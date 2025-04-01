@@ -20,6 +20,18 @@ interface DuoStat {
 }
 interface ChemistryClientProps { availablePlayers: Player[]; }
 
+// New type for the data returned by the query
+interface MatchPlayerEntry {
+  match_id: number;
+  player_id: number;
+  team: string;
+  matches: {
+    id: number;
+    score_a: number;
+    score_b: number;
+  } | null;
+}
+
 export default function ChemistryClientComponent({ availablePlayers }: ChemistryClientProps) {
   const [allDuoStats, setAllDuoStats] = useState<DuoStat[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -38,14 +50,36 @@ export default function ChemistryClientComponent({ availablePlayers }: Chemistry
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("User not logged in");
-            const { data: matchPlayerEntries, error: mpError } = await supabase.from('match_players').select(`match_id, player_id, team, matches (id, score_a, score_b)`);
+            const { data: matchPlayerEntries, error: mpError } = await supabase
+              .from('match_players')
+              .select(`
+                match_id,
+                player_id,
+                team,
+                matches:matches (
+                  id,
+                  score_a,
+                  score_b
+                )
+              `)
+              .returns<MatchPlayerEntry[]>(); // Specify the return type
+
             if (mpError) throw mpError;
             if (!matchPlayerEntries) { setAllDuoStats([]); setIsLoading(false); return; }
 
             const matchesDataMap = new Map<number, MatchWithPlayerTeams>();
             matchPlayerEntries.forEach(entry => { /* ... (process entries into map) ... */
-                if (!entry.matches) return; const matchId = entry.match_id;
-                if (!matchesDataMap.has(matchId)) { matchesDataMap.set(matchId, { id: matchId, score_a: entry.matches.score_a, score_b: entry.matches.score_b, teamA_player_ids: new Set<number>(), teamB_player_ids: new Set<number>() }); }
+                if (!entry.matches) return;
+                const matchId = entry.match_id;
+                if (!matchesDataMap.has(matchId)) {
+                  matchesDataMap.set(matchId, {
+                    id: matchId,
+                    score_a: entry.matches.score_a,
+                    score_b: entry.matches.score_b,
+                    teamA_player_ids: new Set<number>(),
+                    teamB_player_ids: new Set<number>(),
+                  });
+                }
                 const matchData = matchesDataMap.get(matchId)!;
                 if (entry.team === 'A') { matchData.teamA_player_ids.add(entry.player_id); } else if (entry.team === 'B') { matchData.teamB_player_ids.add(entry.player_id); }
             });
