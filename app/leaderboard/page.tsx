@@ -5,7 +5,6 @@ import { redirect } from 'next/navigation';
 import LeaderboardClientComponent from './LeaderboardClientComponent';
 import type { LeaderboardData } from './LeaderboardClientComponent'; // Import type
 
-
 export default async function LeaderboardPage() {
   const supabase = createClient();
 
@@ -16,7 +15,7 @@ export default async function LeaderboardPage() {
 
   // --- Fetch ALL Necessary Data ---
   let leaderboardData: LeaderboardData[] = [];
-  let fetchError: unknown = null;
+  let fetchError: Error | null = null;
 
   try {
       // Fetch players, matches, matchPlayers... (same fetch logic as before)
@@ -46,7 +45,12 @@ export default async function LeaderboardPage() {
 
   } catch (err) { 
       console.error("Error fetching or processing leaderboard data:", err);
-      fetchError = err; leaderboardData = [];
+      if (err instanceof Error) {
+        fetchError = err;
+      } else {
+        fetchError = new Error("An unknown error occurred");
+      }
+      leaderboardData = [];
   }
 
   // --- Render Client Component ---
