@@ -1,11 +1,10 @@
 // app/dashboard/DashboardClientComponent.tsx
-// Final Combined Version + Share Link Functionality
 'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import StatCard from '../../components/StatCard';
-import { Swords, Trophy, Percent, TrendingUp, User, Loader2, Filter, Star, Link as LinkIcon, CalendarDays, ShieldCheck, Share2, Copy } from 'lucide-react'; // Added Share2, Copy
+import { Swords, Trophy, Percent, TrendingUp, Loader2, Filter, CalendarDays, LinkIcon } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 // --- Type Definitions (Ensure exported or shared) ---
@@ -30,7 +29,6 @@ interface PlayerDisplayStats {
 interface Profile {
     id: string; // UUID
     username: string | null;
-    share_token: string | null; // Added share token
 }
 
 // Props for the component
@@ -52,46 +50,39 @@ export default function DashboardClientComponent({
   const [minGamesPlayed, setMinGamesPlayed] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false); // Loading for stat cards update
   const [error, setError] = useState<string | null>(null);
-  // ++ State for profile and share link ++
+  // ++ State for profile ++
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [shareLink, setShareLink] = useState<string>('');
-  const [isGeneratingToken, setIsGeneratingToken] = useState<boolean>(false);
-  const [copySuccess, setCopySuccess] = useState<string>('');
 
   const supabase = createClient();
 
   // Effect to fetch user profile data on mount
   useEffect(() => {
       const fetchProfile = async () => {
-          const { data: { user } } = await supabase.auth.getUser();
+        try {
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          if (userError) throw userError;
           if (user) {
               console.log("Fetching profile for user:", user.id); // Debug log
               const { data: profileData, error: profileError } = await supabase
                   .from('profiles')
-                  .select('id, username, share_token') // Fetch share_token
+                  .select('id, username') // Fetch id and username
                   .eq('id', user.id)
                   .single();
 
-              if (profileError) {
-                  console.error("Error fetching profile:", profileError);
-                  setError("Could not load profile data for sharing.");
-              } else if (profileData) {
+              if (profileError) throw profileError;
+              if (profileData) {
                   console.log("Profile data fetched:", profileData); // Debug log
                   setProfile(profileData);
-                  if (profileData.share_token) {
-                      const origin = typeof window !== 'undefined' ? window.location.origin : '';
-                      setShareLink(`${origin}/share/${profileData.share_token}`);
-                      console.log("Share link set:", `${origin}/share/${profileData.share_token}`); // Debug log
-                  } else {
-                      console.log("No share token found for profile."); // Debug log
-                      setShareLink(''); // Ensure link is empty if token is null
-                  }
               } else {
                    console.log("No profile data returned."); // Debug log
               }
           } else {
               console.log("No user found for profile fetch."); // Debug log
           }
+        } catch (error) {
+          console.error("Error fetching profile:", error);
+          setError("Could not load profile data.");
+        }
       };
       fetchProfile();
   }, [supabase]); // Dependency: supabase client instance
@@ -112,38 +103,6 @@ export default function DashboardClientComponent({
   const filteredLeaderboard = leaderboardData.filter(player => player.gamesPlayed >= minGamesPlayed);
   const top3Leaderboard = filteredLeaderboard.slice(0, 3);
   const getDuoWinLoss = (stats: DuoStat | null) => { /* ... */ if (!stats || stats.gamesTogether === 0) return 'N/A'; const l = stats.gamesTogether - stats.winsTogether; return `${stats.winsTogether}W - ${l}L`; };
-
-  // ++ Handler to generate or regenerate share token ++
-  const handleGenerateShareToken = async () => {
-      if (!profile) return;
-      setIsGeneratingToken(true); setCopySuccess('');
-      try {
-          const newToken = crypto.randomUUID();
-          const { data: updatedProfile, error: updateError } = await supabase
-              .from('profiles')
-              .update({ share_token: newToken })
-              .eq('id', profile.id)
-              .select('share_token')
-              .single();
-          if (updateError) throw updateError;
-          if (updatedProfile?.share_token) {
-              setProfile(prev => prev ? { ...prev, share_token: updatedProfile.share_token } : null);
-              const origin = typeof window !== 'undefined' ? window.location.origin : '';
-              const newLink = `${origin}/share/${updatedProfile.share_token}`;
-              setShareLink(newLink);
-              alert("New share link generated!");
-          } else { throw new Error("Failed to retrieve new token."); }
-      } catch (error) { console.error("Error generating share token:", error); alert(`Error generating link: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      } finally { setIsGeneratingToken(false); }
-  };
-
-  // ++ Handler to copy share link to clipboard ++
-  const handleCopyLink = () => {
-      if (!shareLink) return;
-      navigator.clipboard.writeText(shareLink)
-          .then(() => { setCopySuccess('Link Copied!'); setTimeout(() => setCopySuccess(''), 2000); })
-          .catch(err => { console.error('Failed to copy link: ', err); setCopySuccess('Failed to copy!'); setTimeout(() => setCopySuccess(''), 2000); });
-  };
 
   // --- JSX Rendering ---
   return (
@@ -191,35 +150,6 @@ export default function DashboardClientComponent({
             {lastMatch ? ( <div className="space-y-2"><p className="text-sm text-gray-600 dark:text-gray-400">Date: {lastMatch.match_date}</p><p className="text-lg font-bold text-center text-gray-800 dark:text-white my-1">{lastMatch.score_a} - {lastMatch.score_b}</p><div className="text-xs text-gray-500 dark:text-gray-400 space-y-1"><p><span className="font-medium text-blue-600 dark:text-blue-400">A:</span> {lastMatch.teamANames.join(', ')}</p><p><span className="font-medium text-red-600 dark:text-red-400">B:</span> {lastMatch.teamBNames.join(', ')}</p></div></div> ) : ( <p className="text-sm text-gray-500 dark:text-gray-400">No matches recorded.</p> )}
              <div className="text-right mt-2"><Link href="/matches" className="text-xs text-blue-600 dark:text-blue-400 hover:underline">View All Matches</Link></div>
         </div>
-
-        {/* ++ NEW: Share Link Section ++ */}
-        <div className="lg:col-span-3 mt-2 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-             <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white flex items-center">
-                 <Share2 className="w-5 h-5 mr-2 text-cyan-500"/> Share Public Stats Link
-             </h2>
-             {profile ? (
-                 shareLink ? (
-                     <div className="flex flex-col sm:flex-row items-center gap-2">
-                        <input type="text" readOnly value={shareLink} className="flex-grow px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm" onClick={(e) => (e.target as HTMLInputElement).select()} />
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                             <button onClick={handleCopyLink} className="p-1.5 bg-gray-200 dark:bg-gray-600 rounded hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200" title="Copy Link"><Copy className="w-4 h-4"/></button>
-                             <button onClick={handleGenerateShareToken} disabled={isGeneratingToken} className="text-xs text-gray-500 hover:underline disabled:opacity-50">{isGeneratingToken ? 'Generating...' : 'Regenerate'}</button>
-                        </div>
-                        {copySuccess && <span className="text-xs text-green-600 dark:text-green-400 ml-2 flex-shrink-0">{copySuccess}</span>}
-                     </div>
-                 ) : (
-                     <div className="flex items-center gap-2">
-                         <p className="text-sm text-gray-500 dark:text-gray-400">No share link generated yet.</p>
-                         <button onClick={handleGenerateShareToken} disabled={isGeneratingToken} className="px-3 py-1 bg-cyan-600 text-white text-xs font-medium rounded shadow hover:bg-cyan-700 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50 disabled:opacity-50">{isGeneratingToken ? 'Generating...' : 'Generate Link'}</button>
-                     </div>
-                 )
-             ) : (
-                 <p className="text-sm text-gray-500 dark:text-gray-400">Loading profile...</p>
-             )}
-             <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Share this link with team members for read-only access to stats (no login required).</p>
-        </div>
-        {/* -- End Share Link Section -- */}
-
       </div>
     </div>
   );

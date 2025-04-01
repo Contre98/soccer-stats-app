@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowDownUp, ArrowDown, ArrowUp, Star, Filter } from 'lucide-react';
+import { ArrowDownUp, ArrowDown, ArrowUp, Filter } from 'lucide-react';
 
 // Type definition for leaderboard data (ensure consistent with server)
 // Ideally imported from a shared types file

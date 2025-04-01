@@ -1,7 +1,7 @@
 // app/team-generator/TeamGeneratorClientComponent.tsx
 'use client';
 
-import { useState, ChangeEvent } from 'react';
+import { useState } from 'react';
 import { Users, Shuffle, ShieldCheck, Star, Trophy, Loader2, CheckSquare, Square, Save } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { addMatchWithPlayers } from '@/lib/actions/matchActions';
@@ -19,12 +19,6 @@ interface TeamOption { teamA: Player[]; teamB: Player[]; diff: number; sumA: num
 type TeamSize = 5 | 6 | 8 | 11;
 const teamSizes: TeamSize[] = [5, 6, 8, 11];
 
-// Helper function to shuffle an array (Fisher-Yates)
-function shuffleArray<T>(array: T[]): T[] { /* ... */
-  let currentIndex = array.length, randomIndex; const newArray = [...array];
-  while (currentIndex !== 0) { randomIndex = Math.floor(Math.random() * currentIndex); currentIndex--; [newArray[currentIndex], newArray[randomIndex]] = [newArray[randomIndex], newArray[currentIndex]]; }
-  return newArray;
-}
 // Helper function to create a unique key for a team combination
 const getCombinationKey = (teamA: Player[], teamB: Player[]): string => { /* ... */
     const teamAIds = teamA.map(p => p.id).sort().join(','); const teamBIds = teamB.map(p => p.id).sort().join(','); return [teamAIds, teamBIds].sort().join('|');
@@ -35,22 +29,8 @@ function* getCombinations<T>(array: T[], k: number): Generator<T[]> { /* ... */
     if (k < 0 || k > array.length) { return; }
     if (k === 0) { yield []; return; }
     if (k === array.length) { yield [...array]; return; }
-    const firstElement = array[0]; const restOfArray = array.slice(1);
-    let yieldedCount1 = 0;
-    for (const combo of getCombinations(restOfArray, k - 1)) {
-        yield [firstElement, ...combo];
-        yieldedCount1++;
-    }
-    // console.log(` -> Yielded ${yieldedCount1} combos with first element`); // DEBUG
-    let yieldedCount2 = 0;
-    if (restOfArray.length >= k) {
-        for (const combo of getCombinations(restOfArray, k)) { // Use regular for...of with yield* target
-             yield combo;
-             yieldedCount2++;
-        }
     }
     // console.log(` -> Yielded ${yieldedCount2} combos without first element`); // DEBUG
-}
 
 
 export default function TeamGeneratorClientComponent({ availablePlayers }: TeamGeneratorClientProps) {
@@ -172,7 +152,7 @@ export default function TeamGeneratorClientComponent({ availablePlayers }: TeamG
           {/* ... Generated Teams Display ... */}
           {teamsGenerated && generatedOptions.length > 0 && ( <div className="space-y-6"><h2 className="text-xl font-semibold text-gray-800 dark:text-white">Top {generatedOptions.length} Balanced Option{generatedOptions.length === 1 ? '' : 's'} Found</h2>{generatedOptions.map((option, index) => (<div key={index} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border border-gray-200 dark:border-gray-700"><div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2"><h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center">{index === 0 ? <Trophy className="w-5 h-5 mr-2 inline text-yellow-500"/> : <span className="mr-2 font-bold">{index + 1}.</span>}Option {index + 1} {index === 0 ? '(Best Balance)' : ''}</h3><span className="text-sm font-medium text-gray-600 dark:text-gray-400">Rating Diff: {option.diff}</span></div><div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div className="border border-blue-200 dark:border-blue-700 rounded p-3"><h4 className="text-md font-semibold mb-2 text-blue-700 dark:text-blue-400 flex items-center justify-between"><span><ShieldCheck className="w-4 h-4 mr-1 inline"/> Team A</span><span className="text-xs font-mono">Σ {option.sumA}</span></h4><ul className="space-y-1">{option.teamA.map(player => (<li key={player.id} className="text-sm text-gray-800 dark:text-gray-200 flex justify-between items-center"><span>{player.name}</span><span className="text-xs text-gray-500 dark:text-gray-400 flex items-center"><Star className="w-3 h-3 mr-1 text-yellow-400" /> {player.manual_rating}</span></li>))}</ul></div><div className="border border-red-200 dark:border-red-700 rounded p-3"><h4 className="text-md font-semibold mb-2 text-red-700 dark:text-red-400 flex items-center justify-between"><span><ShieldCheck className="w-4 h-4 mr-1 inline"/> Team B</span><span className="text-xs font-mono">Σ {option.sumB}</span></h4><ul className="space-y-1">{option.teamB.map(player => (<li key={player.id} className="text-sm text-gray-800 dark:text-gray-200 flex justify-between items-center"><span>{player.name}</span><span className="text-xs text-gray-500 dark:text-gray-400 flex items-center"><Star className="w-3 h-3 mr-1 text-yellow-400" /> {player.manual_rating}</span></li>))}</ul></div></div><div className="mt-4 text-right"><button onClick={() => handleOpenSaveModal(option)} className="inline-flex items-center px-3 py-1.5 bg-gray-600 text-white text-xs font-medium rounded shadow hover:bg-gray-700 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 disabled:opacity-50" disabled={isLoading}><Save className="w-4 h-4 mr-1.5" />Save Option {index + 1} as Match</button></div></div>))}</div>)}
            {/* ... Placeholders ... */}
-           {!teamsGenerated && !isLoading && (<div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 text-center"><p className="text-gray-500 dark:text-gray-400">Select {requiredPlayers} players and click "Generate Teams"...</p></div>)}
+           {!teamsGenerated && !isLoading && (<div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 text-center"><p className="text-gray-500 dark:text-gray-400">Select {requiredPlayers} players and click &quot;Generate Teams&quot;...</p></div>)}
            {teamsGenerated && generatedOptions.length === 0 && (<div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 text-center"><p className="text-red-500 dark:text-red-400">Could not generate any unique balanced teams with this selection.</p></div>)}
            {isLoading && (<div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 text-center"><div className="flex justify-center items-center"><Loader2 className="w-6 h-6 mr-2 animate-spin"/> <span className="text-gray-600 dark:text-gray-400">Generating...</span></div></div>)}
         </div>

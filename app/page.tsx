@@ -9,8 +9,6 @@ import DashboardClientComponent, { LeaderboardData, Player as AvailablePlayer, D
 // --- Type Definitions ---
 // Internal types for calculation
 interface PlayerInternal { id: number; name: string; }
-interface Match { id: number; match_date: string; score_a: number; score_b: number; }
-interface MatchPlayer { match_id: number; player_id: number; team: 'A' | 'B'; }
 interface ProcessedMatch {
   id: number; score_a: number; score_b: number; match_date: string;
   teamA_player_ids: Set<number>; teamB_player_ids: Set<number>;
@@ -24,7 +22,6 @@ interface CalculationDuoStat {
 
 
 export default async function DashboardPage() {
-  const cookieStore = cookies();
   const supabase = createClient();
 
   // --- Get Session ---
@@ -33,8 +30,8 @@ export default async function DashboardPage() {
   const userId = user.id;
 
   // --- Initialize Data Holders ---
-  let leaderboardData: LeaderboardData[] = [];
-  let allDuoStats: CalculationDuoStat[] = [];
+  const leaderboardData: LeaderboardData[] = [];
+  const allDuoStats: CalculationDuoStat[] = [];
   let lastMatch: LastMatchData | null = null;
   let availablePlayers: AvailablePlayer[] = []; // Use client's Player type alias
   let fetchError: any = null;

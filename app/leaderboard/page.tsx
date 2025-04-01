@@ -6,13 +6,8 @@ import { redirect } from 'next/navigation';
 import LeaderboardClientComponent from './LeaderboardClientComponent';
 import type { LeaderboardData } from './LeaderboardClientComponent'; // Import type
 
-// --- Type Definitions (Internal) ---
-interface Player { id: number; name: string; }
-interface Match { id: number; match_date: string; score_a: number; score_b: number; }
-interface MatchPlayer { match_id: number; player_id: number; team: 'A' | 'B'; }
 
 export default async function LeaderboardPage() {
-  const cookieStore = cookies();
   const supabase = createClient();
 
   // --- Get Session ---
