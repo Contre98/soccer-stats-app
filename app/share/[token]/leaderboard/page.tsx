@@ -1,5 +1,5 @@
-// app/share/[token]/leaderboard/page.tsx (Simplified for Debugging)
-import { notFound } from 'next/navigation';
+// app/share/[token]/leaderboard/page.tsx (Simplified for Debugging - Fixed)
+// Removed unused import: import { notFound } from 'next/navigation';
 
 // Define props inline
 export default function ShareLeaderboardPage({
