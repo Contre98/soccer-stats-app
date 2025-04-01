@@ -20,6 +20,17 @@ interface DuoStat {
 }
 interface ChemistryClientProps { availablePlayers: Player[]; }
 
+interface MatchPlayerEntry {
+  match_id: number;
+  player_id: number;
+  team: 'A' | 'B';
+  matches: {
+    id: number;
+    score_a: number;
+    score_b: number;
+  } | null;
+}
+
 export default function ChemistryClientComponent({ availablePlayers }: ChemistryClientProps) {
   const [allDuoStats, setAllDuoStats] = useState<DuoStat[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -38,7 +49,7 @@ export default function ChemistryClientComponent({ availablePlayers }: Chemistry
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("User not logged in");
-            const { data: matchPlayerEntries, error: mpError } = await supabase.from('match_players').select(`match_id, player_id, team, matches (id, score_a, score_b)`);
+            const { data: matchPlayerEntries, error: mpError } = await supabase.from('match_players').select(`match_id, player_id, team, matches (id, score_a, score_b)`) as { data: MatchPlayerEntry[] | null; error: any };
             if (mpError) throw mpError;
             if (!matchPlayerEntries) { setAllDuoStats([]); setIsLoading(false); return; }
 
