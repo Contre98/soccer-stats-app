@@ -11,18 +11,17 @@ interface LeaderboardData {
   losses: number;
   draws: number;
   winRate: number | string;
-  winRateDisplay: string; // Added for clarity based on usage
+  winRateDisplay: string;
   streak: number;
 }
 
-// Removed the separate ShareLeaderboardPageProps interface
-// Define props inline in the function signature instead
+// Define a specific type alias for this page's props WITHIN this file
+type PageProps = {
+  params: { token: string };
+};
 
-export default async function ShareLeaderboardPage({
-  params,
-}: {
-  params: { token: string }; // Define props type directly here
-}) {
+// Use the locally defined PageProps type here
+export default async function ShareLeaderboardPage({ params }: PageProps) {
   const shareToken = params.token;
   // Basic validation - consider more robust validation if needed
   if (!shareToken || typeof shareToken !== 'string') {
