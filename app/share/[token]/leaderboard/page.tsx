@@ -14,6 +14,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Define the type for the params in generateMetadata
+interface MetadataParams {
+  token: string;
+}
+
 interface PageProps {
   params: {
     token: string;
@@ -25,7 +30,11 @@ interface StaticParams {
   token: string;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: MetadataParams;
+}): Promise<Metadata> {
   // read route params
   const { token } = params;
 
