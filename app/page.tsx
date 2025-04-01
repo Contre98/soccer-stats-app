@@ -1,6 +1,5 @@
 // app/page.tsx (Server Component - Calculates All Data for Final Client)
 import { createClient } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 // Import client component and the types it expects as props
 // Ensure the types are exported from the client component file or a shared types file

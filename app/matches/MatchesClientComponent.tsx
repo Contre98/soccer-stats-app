@@ -115,7 +115,6 @@ export default function MatchesClientComponent({ initialMatches, availablePlayer
 
   // --- Helper Functions & JSX ---
   const getResultClass = (scoreA: number, scoreB: number): string => { if(scoreA > scoreB) return 'text-green-600 dark:text-green-400 font-semibold'; if(scoreB > scoreA) return 'text-red-600 dark:text-red-400 font-semibold'; return 'text-gray-600 dark:text-gray-400 font-semibold'; };
-  function getYouTubeVideoId(url: string | null | undefined): string | null { /* Basic extraction logic */ if (!url) return null; try { const u = new URL(url.startsWith('http')?url:`https://${url}`); if(u.hostname.includes('youtube.com') && u.searchParams.get('v')) return u.searchParams.get('v'); if(u.hostname === 'youtu.be') return u.pathname.substring(1); } catch {} return null; }
 
   return (
     <div className="container mx-auto px-4 py-8">

@@ -1,6 +1,5 @@
 // app/leaderboard/page.tsx (Server Component - Passes Data to Client)
 import { createClient } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 // Import the new client component and its types
 import LeaderboardClientComponent from './LeaderboardClientComponent';

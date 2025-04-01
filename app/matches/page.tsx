@@ -1,6 +1,5 @@
 // app/matches/page.tsx (Server Component)
 import { createClient } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
 import MatchesClientComponent from './MatchesClientComponent';
 import { redirect } from 'next/navigation';
 

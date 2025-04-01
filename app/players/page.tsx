@@ -1,6 +1,5 @@
 // app/players/page.tsx (Server Component)
 import { createClient } from '@/lib/supabase/server'; // Import server client
-import { cookies } from 'next/headers'; // Needed for server client
 import PlayersClientComponent from './PlayersClientComponent'; // Import the new client component
 import { redirect } from 'next/navigation'; // For redirecting if user not found
 

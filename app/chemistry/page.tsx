@@ -1,6 +1,5 @@
 // app/chemistry/page.tsx (Server Component)
 import { createClient } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import ChemistryClientComponent from './ChemistryClientComponent'; // Import the client component
 
