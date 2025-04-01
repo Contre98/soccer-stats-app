@@ -1,6 +1,5 @@
 // app/page.tsx (Server Component - Calculates All Data for Final Client)
 import { createClient } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 // Import client component and the types it expects as props
 // Ensure the types are exported from the client component file or a shared types file
@@ -34,7 +33,7 @@ export default async function DashboardPage() {
   const allDuoStats: CalculationDuoStat[] = [];
   let lastMatch: LastMatchData | null = null;
   let availablePlayers: AvailablePlayer[] = []; // Use client's Player type alias
-  let fetchError: any = null;
+  let fetchError: unknown = null;
 
   try {
       // --- Fetch ALL Necessary Data ---
@@ -89,7 +88,7 @@ export default async function DashboardPage() {
           }
       } // End if availablePlayers.length > 0
 
-  } catch (err) { console.error("Error fetching or processing dashboard data:", err); fetchError = err; /* Data arrays remain empty */ }
+  } catch (err) { console.error("Error fetching or processing dashboard data:", err); /* Data arrays remain empty */ }
 
   // --- Prepare Props for Client ---
   const minGamesThreshold = 5; // For Best Duo

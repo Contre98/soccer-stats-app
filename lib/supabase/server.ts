@@ -7,7 +7,6 @@ import { cookies } from 'next/headers'
  *
  * Reads Supabase URL and anonymous key from environment variables.
  * Manages authentication state by reading and writing cookies using the Next.js `cookies` function.
- *
  * @returns {SupabaseClient} A Supabase client instance for server-side operations.
  * @throws {Error} If Supabase URL or anon key is missing in environment variables.
  */

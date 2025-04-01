@@ -16,7 +16,7 @@ export default async function LeaderboardPage() {
 
   // --- Fetch ALL Necessary Data ---
   let leaderboardData: LeaderboardData[] = [];
-  let fetchError: any = null;
+  let fetchError: unknown = null;
 
   try {
       // Fetch players, matches, matchPlayers... (same fetch logic as before)
