@@ -1,6 +1,5 @@
 // app/replays/page.tsx (Server Component)
 import { createClient } from '@/lib/supabase/server'; // Import server client
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Youtube, CalendarDays, Clapperboard } from 'lucide-react'; // Import icons
 

@@ -51,7 +51,7 @@ export default function DashboardClientComponent({
   const [isLoading, setIsLoading] = useState<boolean>(false); // Loading for stat cards update
   const [error, setError] = useState<string | null>(null);
   // ++ State for profile ++
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [, setProfile] = useState<Profile | null>(null);
 
   const supabase = createClient();
 

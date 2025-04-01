@@ -1,6 +1,5 @@
 // app/team-generator/page.tsx (Server Component)
 import { createClient } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import TeamGeneratorClientComponent from './TeamGeneratorClientComponent'; // Import the client component
 
