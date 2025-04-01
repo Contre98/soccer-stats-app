@@ -12,7 +12,6 @@ interface MatchWithPlayers {
     teamA_players: Player[]; teamB_players: Player[];
 }
 interface SavedMatchData { id: number; match_date: string; score_a: number; score_b: number; user_id: string; }
-interface MatchPlayerEntry { match_id: number; player_id: number; team: string; }
 
 export default function MatchesClientComponent() {
     const [matches, setMatches] = useState<MatchWithPlayers[]>([]);
