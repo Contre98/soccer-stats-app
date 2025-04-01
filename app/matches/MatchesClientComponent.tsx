@@ -75,7 +75,7 @@ export default function MatchesClientComponent({ initialMatches, availablePlayer
 
       if (fetchError || !newlySavedMatchWithPlayers) {
           console.error("Error fetching newly saved match details:", fetchError);
-          setMatches(current => [newMatchBase as MatchWithPlayers, ...current]); // Fallback
+          setMatches(current => [newMatchBase as unknown as MatchWithPlayers, ...current]); // Fallback
           alert("Match saved! Refresh may be needed to see player names.");
       } else {
           setMatches(current => [newlySavedMatchWithPlayers as MatchWithPlayers, ...current]);
