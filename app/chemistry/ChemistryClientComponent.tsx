@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Link as LinkIcon, Loader2, ArrowDownUp, Filter } from 'lucide-react'; // Added Filter icon
+import { PostgrestError } from '@supabase/supabase-js';
 
 // Types
 interface Player {
@@ -49,7 +50,7 @@ export default function ChemistryClientComponent({ availablePlayers }: Chemistry
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("User not logged in");
-            const { data: matchPlayerEntries, error: mpError } = await supabase.from('match_players').select(`match_id, player_id, team, matches (id, score_a, score_b)`) as { data: MatchPlayerEntry[] | null; error: any };
+            const { data: matchPlayerEntries, error: mpError } = await supabase.from('match_players').select(`match_id, player_id, team, matches (id, score_a, score_b)`) as { data: MatchPlayerEntry[] | null; error: PostgrestError | null };
             if (mpError) throw mpError;
             if (!matchPlayerEntries) { setAllDuoStats([]); setIsLoading(false); return; }
 
