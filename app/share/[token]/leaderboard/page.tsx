@@ -43,12 +43,11 @@ export async function generateStaticParams(): Promise<StaticParams[]> {
   }
 }
 
-export default async function Page({
-  params,
-}: {
-  params: { token: string };
-}) {
-  const { token } = params;
+// Define the type for the params as a Promise
+type Params = Promise<{ token: string }>;
+
+export default async function Page({ params }: { params: Params }) {
+  const { token } = await params; // Await the params object
 
   try {
     // Check if the token is valid by querying Supabase
