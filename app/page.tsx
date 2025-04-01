@@ -33,7 +33,6 @@ export default async function DashboardPage() {
   const allDuoStats: CalculationDuoStat[] = [];
   let lastMatch: LastMatchData | null = null;
   let availablePlayers: AvailablePlayer[] = []; // Use client's Player type alias
-  let fetchError: unknown = null;
 
   try {
       // --- Fetch ALL Necessary Data ---
