@@ -1,6 +1,7 @@
 // lib/supabase/server.ts
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import { SupabaseClient } from '@supabase/supabase-js'; // Import SupabaseClient type if needed elsewhere
 
 /**
  * Creates a Supabase client configured for server-side usage (Server Components, Route Handlers, Server Actions).
@@ -13,7 +14,7 @@ import { cookies } from 'next/headers'
  */
 export function createClient() {
   // Get the cookie store from Next.js headers
-  const cookieStore = cookies()
+  const cookieStore = cookies();
 
   // Ensure environment variables are defined
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -31,12 +32,16 @@ export function createClient() {
       // Define cookie handling logic for server-side authentication
       cookies: {
         async get(name: string) {
-          return (await cookieStore).get(name)?.value
+          // Use await here as cookies() can return a promise
+          return (await cookieStore).get(name)?.value;
         },
         async set(name: string, value: string, options: CookieOptions) {
           try {
-            (await cookieStore).set({ name, value, ...options })
+            // Use await here as cookies() can return a promise
+            (await cookieStore).set({ name, value, ...options });
           } catch (error) {
+            // Log the error to fix the no-unused-vars lint issue
+            console.error("Error setting cookie in server component/action:", error);
             // The `set` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing
             // user sessions.
@@ -44,8 +49,11 @@ export function createClient() {
         },
         async remove(name: string, options: CookieOptions) {
           try {
-            (await cookieStore).set({ name, value: '', ...options })
+             // Use await here as cookies() can return a promise
+            (await cookieStore).set({ name, value: '', ...options });
           } catch (error) {
+             // Log the error to fix the no-unused-vars lint issue
+            console.error("Error removing cookie in server component/action:", error);
             // The `delete` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing
             // user sessions.
@@ -58,3 +66,4 @@ export function createClient() {
 
 // Note: You might add more specific server clients here later if needed,
 // e.g., one using the service_role key for admin tasks, but start with this.
+
