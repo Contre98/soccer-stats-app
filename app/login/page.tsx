@@ -22,7 +22,7 @@ export default function LoginPage() {
 
     // Listener for authentication events (SIGNED_IN, SIGNED_OUT)
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (event) => {
         if (event === 'SIGNED_IN') {
           console.log('User signed in, redirecting to dashboard...');
           router.push('/'); // Redirect to home/dashboard page

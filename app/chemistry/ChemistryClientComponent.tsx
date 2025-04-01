@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Users, Link as LinkIcon, Percent, Loader2, Swords, Trophy, ArrowDownUp, Filter } from 'lucide-react'; // Added Filter icon
+import { Link as LinkIcon, Loader2, ArrowDownUp, Filter } from 'lucide-react'; // Added Filter icon
 
 // Types
 interface Player {

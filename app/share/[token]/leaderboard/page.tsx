@@ -1,13 +1,6 @@
 // app/share/[token]/leaderboard/page.tsx (Server Component)
 import { notFound } from 'next/navigation';
 import { supabaseAdmin } from '@/lib/supabase/admin';
-import { ArrowDownUp, Star, Trophy } from 'lucide-react'; // Icons
-
-// --- Type Definitions ---
-// (Should match definitions in the main share page/layout)
-interface Player { id: number; name: string; }
-interface Match { id: number; match_date: string; score_a: number; score_b: number; }
-interface MatchPlayer { match_id: number; player_id: number; team: 'A' | 'B'; }
 interface LeaderboardData {
   playerId: number; playerName: string; gamesPlayed: number; wins: number;
   losses: number; draws: number; winRate: number | string;

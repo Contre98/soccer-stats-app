@@ -1,7 +1,7 @@
 // app/team-generator/TeamGeneratorClientComponent.tsx
 'use client';
 
-import { useState, ChangeEvent } from 'react';
+import { useState } from 'react';
 import { Users, Shuffle, ShieldCheck, Star, Trophy, Loader2, CheckSquare, Square, Save } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { addMatchWithPlayers } from '@/lib/actions/matchActions';
@@ -20,11 +20,6 @@ type TeamSize = 5 | 6 | 8 | 11;
 const teamSizes: TeamSize[] = [5, 6, 8, 11];
 
 // Helper function to shuffle an array (Fisher-Yates)
-function shuffleArray<T>(array: T[]): T[] { /* ... */
-  let currentIndex = array.length, randomIndex; const newArray = [...array];
-  while (currentIndex !== 0) { randomIndex = Math.floor(Math.random() * currentIndex); currentIndex--; [newArray[currentIndex], newArray[randomIndex]] = [newArray[randomIndex], newArray[currentIndex]]; }
-  return newArray;
-}
 // Helper function to create a unique key for a team combination
 const getCombinationKey = (teamA: Player[], teamB: Player[]): string => { /* ... */
     const teamAIds = teamA.map(p => p.id).sort().join(','); const teamBIds = teamB.map(p => p.id).sort().join(','); return [teamAIds, teamBIds].sort().join('|');

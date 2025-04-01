@@ -2,7 +2,7 @@
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Home, Trophy, Users, Swords, Shuffle, Link as LinkIcon, PlaySquare } from 'lucide-react';
+import { Home, Trophy } from 'lucide-react';
 
 // Simple Read-only Sidebar Link
 function ShareSidebarLink({ href, icon: Icon, children }: { href: string; icon: React.ElementType; children: React.ReactNode }) {

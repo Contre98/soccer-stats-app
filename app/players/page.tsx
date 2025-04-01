@@ -4,20 +4,8 @@ import { cookies } from 'next/headers'; // Needed for server client
 import PlayersClientComponent from './PlayersClientComponent'; // Import the new client component
 import { redirect } from 'next/navigation'; // For redirecting if user not found
 
-// Define the Player type matching the database structure
-// Can be moved to a shared types file later (e.g., types/supabase.ts)
-interface Player {
-  id: number;
-  name: string;
-  manual_rating: number;
-  user_id: string;
-  created_at: string;
-}
-
-
 // This page is now an async Server Component
 export default async function PlayersPage() {
-  const cookieStore = cookies(); // Get cookie store
   const supabase = createClient(); // Create server client instance
 
   // Get the current user session

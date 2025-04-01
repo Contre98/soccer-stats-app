@@ -1,8 +1,8 @@
 // app/matches/MatchesClientComponent.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { PlusCircle, Youtube, ExternalLink, X, Calendar as CalendarIcon, Users, Trash2, Edit } from 'lucide-react';
+import { useState } from 'react';
+import { PlusCircle, Youtube, ExternalLink, Trash2, Edit } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import AddMatchModal from './AddMatchModal'; // Assumes moved to separate file
 import EditMatchModal from './EditMatchModal'; // Assumes moved to separate file

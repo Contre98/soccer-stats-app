@@ -27,14 +27,7 @@ interface MatchWithPlayers {
   user_id: string;
   created_at: string;
   match_players: MatchPlayerInfo[]; // Array of players linked to this match
-}
-
-// Player type used for passing available players to the modal
-interface AvailablePlayer {
-  id: number;
-  name: string;
-}
-
+}  
 
 export default async function MatchesPage() {
   const cookieStore = cookies();

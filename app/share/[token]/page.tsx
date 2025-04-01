@@ -1,14 +1,12 @@
 // app/share/[token]/page.tsx (Server Component - Share Dashboard View)
 import { notFound } from 'next/navigation';
 import { supabaseAdmin } from '@/lib/supabase/admin'; // Import the admin client
-import { Link as LinkIcon, Trophy, Star, CalendarDays, ShieldCheck } from 'lucide-react'; // Icons
+import { Link as LinkIcon, Trophy, CalendarDays } from 'lucide-react'; // Icons
 import Link from 'next/link'; // For links in widgets
 
 // --- Type Definitions ---
 // Should match definitions used for calculations and potentially shared
 interface Player { id: number; name: string; }
-interface Match { id: number; match_date: string; score_a: number; score_b: number; }
-interface MatchPlayer { match_id: number; player_id: number; team: 'A' | 'B'; }
 interface LeaderboardData {
   playerId: number; playerName: string; gamesPlayed: number; wins: number;
   losses: number; draws: number; winRate: number | string;
