@@ -34,7 +34,6 @@ export default async function DashboardPage() {
   let allDuoStats: CalculationDuoStat[] = [];
   let lastMatch: LastMatchData | null = null;
   let availablePlayers: AvailablePlayer[] = []; // Use client's Player type alias
-  let fetchError: any = null;
 
   try {
       // --- Fetch ALL Necessary Data ---
@@ -89,7 +88,7 @@ export default async function DashboardPage() {
           }
       } // End if availablePlayers.length > 0
 
-  } catch (err) { console.error("Error fetching or processing dashboard data:", err); fetchError = err; /* Data arrays remain empty */ }
+  } catch (err) { console.error("Error fetching or processing dashboard data:", err); /* Data arrays remain empty */ }
 
   // --- Prepare Props for Client ---
   const minGamesThreshold = 5; // For Best Duo

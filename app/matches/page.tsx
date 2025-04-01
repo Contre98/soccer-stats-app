@@ -30,7 +30,6 @@ interface MatchWithPlayers {
 }  
 
 export default async function MatchesPage() {
-  const cookieStore = cookies();
   const supabase = createClient();
 
   // Get user session

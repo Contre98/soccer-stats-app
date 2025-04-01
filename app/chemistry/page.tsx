@@ -6,7 +6,6 @@ import ChemistryClientComponent from './ChemistryClientComponent'; // Import the
 
   // Ensure this is the default export and it's an async function returning JSX
   export default async function ChemistryPage() {
-  const cookieStore = cookies();
   const supabase = createClient();
 
   // Get user session
