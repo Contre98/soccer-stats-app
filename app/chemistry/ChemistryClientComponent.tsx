@@ -169,7 +169,7 @@ export default function ChemistryClientComponent({ availablePlayers }: Chemistry
         </div>
       )}
 
-       {/* -- Removed Scatter Plot Placeholder -- */}
+       {/* -- Removed Scatter  Plot Placeholder -- */}
 
     </div>
   );
