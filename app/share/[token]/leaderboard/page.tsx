@@ -1,4 +1,3 @@
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 
@@ -14,11 +13,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Define the type for the params in generateMetadata
-interface MetadataParams {
-  token: string;
-}
-
 interface PageProps {
   params: {
     token: string;
@@ -28,19 +22,6 @@ interface PageProps {
 // Define the type for the return value of generateStaticParams
 interface StaticParams {
   token: string;
-}
-
-export async function generateMetadata({
-  params,
-}: {
-  params: MetadataParams;
-}): Promise<Metadata> {
-  // read route params
-  const { token } = params;
-
-  return {
-    title: `Leaderboard for ${token}`,
-  };
 }
 
 export async function generateStaticParams(): Promise<StaticParams[]> {

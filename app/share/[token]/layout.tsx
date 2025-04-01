@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Home, Trophy } from 'lucide-react';
+import { Metadata } from 'next';
 
 // Simple Read-only Sidebar Link
 function ShareSidebarLink({ href, icon: Icon, children }: { href: string; icon: React.ElementType; children: React.ReactNode }) {
@@ -15,13 +16,42 @@ function ShareSidebarLink({ href, icon: Icon, children }: { href: string; icon: 
   );
 }
 
+interface ShareLayoutProps {
+  children: React.ReactNode;
+  params: { token: string };
+}
+
+// Generate Metadata
+export async function generateMetadata({ params }: ShareLayoutProps): Promise<Metadata> {
+  const shareToken = params.token;
+
+  // --- Validate Token & Get Team Name ---
+  // This validation runs for every page within the share section
+  const { data: profile, error: profileError } = await supabaseAdmin
+    .from('profiles')
+    .select('id, username, full_name') // Select name for display
+    .eq('share_token', shareToken)
+    .single();
+
+  // If token is invalid or profile fetch fails, render a "Not Found" page
+  if (profileError || !profile) {
+    console.error(`Share layout: Invalid token (${shareToken}) or error fetching profile:`, profileError);
+    return {
+      title: 'Not Found',
+    };
+  }
+
+  const teamName = profile.full_name || profile.username || `Team Stats`;
+
+  return {
+    title: `${teamName} - Leaderboard`, // Dynamic title based on team name
+  };
+}
+
 export default async function ShareLayout({
   children,
   params,
-}: {
-  children: React.ReactNode;
-  params: { token: string };
-}) {
+}: ShareLayoutProps) {
   const shareToken = params.token;
 
   // --- Validate Token & Get Team Name ---
