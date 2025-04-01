@@ -83,7 +83,7 @@ export default function ChemistryClientComponent({ availablePlayers }: Chemistry
                 const matchData = matchesDataMap.get(matchId)!;
                 if (entry.team === 'A') { matchData.teamA_player_ids.add(entry.player_id); } else if (entry.team === 'B') { matchData.teamB_player_ids.add(entry.player_id); }
             });
-            const allProcessedMatches = Array.from(matchesDataMap.values());
+            const allProcessedMatches: MatchWithPlayerTeams[] = Array.from(matchesDataMap.values());
 
             const playerPairs: { p1: Player; p2: Player }[] = [];
             for (let i = 0; i < availablePlayers.length; i++) { for (let j = i + 1; j < availablePlayers.length; j++) { playerPairs.push({ p1: availablePlayers[i], p2: availablePlayers[j] }); } }
