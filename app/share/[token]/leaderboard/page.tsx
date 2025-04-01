@@ -21,7 +21,7 @@ export default async function ShareLeaderboardPage({ params }: ShareLeaderboardP
   const userId = profile.id;
 
   // --- 2. Fetch Data for Leaderboard using Admin Client ---
-  let leaderboardData: LeaderboardData[] = [];
+  const leaderboardData: LeaderboardData[] = [];
   let fetchError: string | null = null;
 
   try {

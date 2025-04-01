@@ -41,8 +41,8 @@ export default async function ShareDashboardPage({ params }: SharePageProps) {
   const userId = profile.id;
 
   // --- 2. Fetch Data for Widgets using Admin Client ---
-  let leaderboardData: LeaderboardData[] = [];
-  let allDuoStats: DuoStat[] = [];
+  const leaderboardData: LeaderboardData[] = [];
+  const allDuoStats: DuoStat[] = [];
   let lastMatch: LastMatchData | null = null;
   let fetchError: string | null = null;
 

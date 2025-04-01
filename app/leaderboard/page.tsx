@@ -15,7 +15,7 @@ import type { LeaderboardData } from './LeaderboardClientComponent'; // Import t
 
   // --- Fetch ALL Necessary Data ---
   let leaderboardData: LeaderboardData[] = [];
-  let fetchError: any = null;
+  let fetchError: unknown = null;
 
   try {
       // Fetch players, matches, matchPlayers... (same fetch logic as before)
@@ -54,7 +54,11 @@ import type { LeaderboardData } from './LeaderboardClientComponent'; // Import t
     <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Leaderboard</h1>
         {/* Display Error if fetch failed */}
-        {fetchError && ( <div className="mb-4 p-4 text-center text-red-600 dark:text-red-400 bg-red-50 dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-700"> Error loading leaderboard data: {fetchError.message} </div> )}
+        { fetchError && (
+  <div className="mb-4 p-4 text-center text-red-600 dark:text-red-400 bg-red-50 dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-700">
+    Failed to load leaderboard data. Please try again later.
+  </div>
+) }
         {/* Render client component, passing the raw data */}
         <LeaderboardClientComponent initialLeaderboardData={leaderboardData} />
     </div>

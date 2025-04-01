@@ -29,8 +29,8 @@ export default async function DashboardPage() {
   const userId = user.id;
 
   // --- Initialize Data Holders ---
-  let leaderboardData: LeaderboardData[] = [];
-  let allDuoStats: CalculationDuoStat[] = [];
+  const leaderboardData: LeaderboardData[] = [];
+  const allDuoStats: CalculationDuoStat[] = [];
   let lastMatch: LastMatchData | null = null;
   let availablePlayers: AvailablePlayer[] = []; // Use client's Player type alias
 
