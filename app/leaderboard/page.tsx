@@ -44,7 +44,7 @@ export default async function LeaderboardPage() {
       // --- REMOVED Server-Side Sorting based on searchParams ---
       // Let the client handle sorting for interactivity
 
-  } catch (err) {
+  } catch (err) { 
       console.error("Error fetching or processing leaderboard data:", err);
       fetchError = err; leaderboardData = [];
   }
