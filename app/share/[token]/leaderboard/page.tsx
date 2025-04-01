@@ -20,6 +20,11 @@ interface PageProps {
   };
 }
 
+// Define the type for the return value of generateStaticParams
+interface StaticParams {
+  token: string;
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   // read route params
   const { token } = params;
@@ -29,7 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export async function generateStaticParams() {
+export async function generateStaticParams(): Promise<StaticParams[]> {
   try {
     // Fetch all tokens from Supabase
     const { data, error } = await supabase
