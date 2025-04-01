@@ -1,5 +1,6 @@
 // app/page.tsx (Server Component - Calculates All Data for Final Client)
 import { createClient } from '@/lib/supabase/server';
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 // Import client component and the types it expects as props
 // Ensure the types are exported from the client component file or a shared types file
@@ -8,6 +9,8 @@ import DashboardClientComponent, { LeaderboardData, Player as AvailablePlayer, D
 // --- Type Definitions ---
 // Internal types for calculation
 interface PlayerInternal { id: number; name: string; }
+interface Match { id: number; match_date: string; score_a: number; score_b: number; }
+interface MatchPlayer { match_id: number; player_id: number; team: 'A' | 'B'; }
 interface ProcessedMatch {
   id: number; score_a: number; score_b: number; match_date: string;
   teamA_player_ids: Set<number>; teamB_player_ids: Set<number>;
@@ -21,6 +24,7 @@ interface CalculationDuoStat {
 
 
 export default async function DashboardPage() {
+  const cookieStore = cookies();
   const supabase = createClient();
 
   // --- Get Session ---
@@ -29,10 +33,11 @@ export default async function DashboardPage() {
   const userId = user.id;
 
   // --- Initialize Data Holders ---
-  const leaderboardData: LeaderboardData[] = [];
-  const allDuoStats: CalculationDuoStat[] = [];
+  let leaderboardData: LeaderboardData[] = [];
+  let allDuoStats: CalculationDuoStat[] = [];
   let lastMatch: LastMatchData | null = null;
   let availablePlayers: AvailablePlayer[] = []; // Use client's Player type alias
+  let fetchError: any = null;
 
   try {
       // --- Fetch ALL Necessary Data ---
@@ -87,7 +92,7 @@ export default async function DashboardPage() {
           }
       } // End if availablePlayers.length > 0
 
-  } catch (err) { console.error("Error fetching or processing dashboard data:", err); /* Data arrays remain empty */ }
+  } catch (err) { console.error("Error fetching or processing dashboard data:", err); fetchError = err; /* Data arrays remain empty */ }
 
   // --- Prepare Props for Client ---
   const minGamesThreshold = 5; // For Best Duo

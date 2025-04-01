@@ -1,7 +1,7 @@
 // app/players/PlayersClientComponent.tsx
 'use client';
 
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { UserPlus, Edit, Trash2, Star, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 

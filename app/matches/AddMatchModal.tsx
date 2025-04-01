@@ -1,7 +1,7 @@
 // app/matches/AddMatchModal.tsx
 'use client'; // Modals require client-side interactivity
 
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { X, Calendar as CalendarIcon, Youtube, Users } from 'lucide-react';
 
 // Define Player type (or import from shared types file)

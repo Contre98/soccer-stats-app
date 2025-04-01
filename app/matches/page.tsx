@@ -1,5 +1,6 @@
 // app/matches/page.tsx (Server Component)
 import { createClient } from '@/lib/supabase/server';
+import { cookies } from 'next/headers';
 import MatchesClientComponent from './MatchesClientComponent';
 import { redirect } from 'next/navigation';
 
@@ -26,9 +27,17 @@ interface MatchWithPlayers {
   user_id: string;
   created_at: string;
   match_players: MatchPlayerInfo[]; // Array of players linked to this match
-}  
+}
+
+// Player type used for passing available players to the modal
+interface AvailablePlayer {
+  id: number;
+  name: string;
+}
+
 
 export default async function MatchesPage() {
+  const cookieStore = cookies();
   const supabase = createClient();
 
   // Get user session

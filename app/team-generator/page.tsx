@@ -1,10 +1,19 @@
 // app/team-generator/page.tsx (Server Component)
 import { createClient } from '@/lib/supabase/server';
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import TeamGeneratorClientComponent from './TeamGeneratorClientComponent'; // Import the client component
 
+// Player type matching the data we need to fetch from Supabase
+interface Player {
+  id: number;
+  name: string;
+  manual_rating: number; // Rating is needed for the generator logic later
+}
+
 // This is an async Server Component that fetches data before rendering
 export default async function TeamGeneratorPage() {
+  const cookieStore = cookies(); // Access cookies for Supabase server client
   const supabase = createClient(); // Initialize Supabase server client
 
   // Get the current user session

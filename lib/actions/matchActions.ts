@@ -16,7 +16,7 @@ interface MatchInsertData {
 interface SavedMatchData {
     id: number;
     // Include other fields returned by select() if needed
-    [key: string]: unknown;
+    [key: string]: any;
 }
 
 /**

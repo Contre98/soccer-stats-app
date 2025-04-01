@@ -1,8 +1,19 @@
 // app/replays/page.tsx (Server Component)
 import { createClient } from '@/lib/supabase/server'; // Import server client
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Youtube, CalendarDays, Clapperboard } from 'lucide-react'; // Import icons
 
+// Define the Match type matching the 'matches' table structure
+interface Match {
+  id: number;
+  match_date: string; // Changed from 'date'
+  score_a: number;    // Changed from 'scoreA'
+  score_b: number;    // Changed from 'scoreB'
+  replay_url?: string | null; // Changed from 'replayUrl'
+  user_id: string;
+  created_at: string;
+}
 
 // Function to extract YouTube Video ID from various URL formats
 // (Keep this function as it's needed to process the fetched URLs)
@@ -40,6 +51,7 @@ function getYouTubeVideoId(url: string | null | undefined): string | null {
 
 // The main page component is async for server-side data fetching
 export default async function ReplayGalleryPage() {
+  const cookieStore = cookies();
   const supabase = createClient();
 
   // Get user session

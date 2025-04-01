@@ -5,7 +5,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import StatCard from '../../components/StatCard';
-import { Swords, Trophy, Percent, TrendingUp, Loader2, Filter, Link as LinkIcon, CalendarDays, Share2, Copy } from 'lucide-react'; // Added Share2, Copy
+import { Swords, Trophy, Percent, TrendingUp, User, Loader2, Filter, Star, Link as LinkIcon, CalendarDays, ShieldCheck, Share2, Copy } from 'lucide-react'; // Added Share2, Copy
 import { createClient } from '@/lib/supabase/client';
 
 // --- Type Definitions (Ensure exported or shared) ---
