@@ -13,12 +13,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-interface PageProps {
-  params: {
-    token: string;
-  };
-}
-
 // Define the type for the return value of generateStaticParams
 interface StaticParams {
   token: string;
@@ -49,7 +43,11 @@ export async function generateStaticParams(): Promise<StaticParams[]> {
   }
 }
 
-export default async function Page({ params }: PageProps) {
+export default async function Page({
+  params,
+}: {
+  params: { token: string };
+}) {
   const { token } = params;
 
   try {
