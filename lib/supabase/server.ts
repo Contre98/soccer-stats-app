@@ -1,7 +1,6 @@
 // lib/supabase/server.ts
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { SupabaseClient } from '@supabase/supabase-js'; // Import SupabaseClient type if needed elsewhere
 
 /**
  * Creates a Supabase client configured for server-side usage (Server Components, Route Handlers, Server Actions).
