@@ -22,12 +22,8 @@ interface MatchesClientComponentProps {
 // --- Client Component ---
 export default function MatchesClientComponent({
   initialMatches,
-  availablePlayers,
   searchParams // Destructure the new prop here
 }: MatchesClientComponentProps) {
-
-  // State for matches (if you allow client-side modifications)
-  const [matches, setMatches] = useState(initialMatches);
 
   // --- Use searchParams ---
   // Example: Access parameters passed from the URL
@@ -51,7 +47,7 @@ export default function MatchesClientComponent({
     <div>
       <h1>Matches Client View</h1>
       <p>Data received from server.</p>
-      <p>URL Parameter 'myParam': {typeof myParam === 'string' ? myParam : 'Not Provided'}</p>
+      <p>URL Parameter &apos;myParam&apos;: {typeof myParam === 'string' ? myParam : 'Not Provided'}</p>
 
       {/* Add your UI for displaying matches, players, etc. */}
       {/* Example: */}
