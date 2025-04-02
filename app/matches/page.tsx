@@ -1,19 +1,16 @@
-// app/matches/page.tsx (Server Component - Unused Var Fix)
+// app/matches/page.tsx (Server Component - Re-add searchParams Type)
 import { createClient } from '@/lib/supabase/server';
 import MatchesClientComponent from './MatchesClientComponent';
 import { redirect } from 'next/navigation';
 // --- Import Shared Types ---
-// Make sure PlayerInfo and MatchWithPlayers are correctly defined in lib/types.ts
 import type { PlayerInfo, MatchWithPlayers } from '@/lib/types';
 
 const ITEMS_PER_PAGE = 20;
 
-// --- UPDATED Function Signature: Prefix unused 'params' with '_' ---
+// --- UPDATED Function Signature: Add back type annotation ONLY for searchParams ---
 export default async function MatchesPage({
-  params: _params, // Prefixed with underscore to indicate unused
   searchParams,
-}: {
-  params: { [key: string]: string | string[] | undefined }; // Standard params type
+}: { // Add type annotation for the destructured props object
   searchParams?: { [key: string]: string | string[] | undefined }; // Standard searchParams type (optional)
 }) {
 // --- END UPDATED Signature ---
@@ -31,10 +28,11 @@ export default async function MatchesPage({
   const userId = session.user.id;
 
   // Pagination Logic - Safely access searchParams
-  const pageParam = searchParams?.page; // Use optional chaining
+  const pageParam = searchParams?.page;
   let currentPage = 1;
-  if (typeof pageParam === 'string') {
-      const parsedPage = parseInt(pageParam, 10);
+  const pageString = Array.isArray(pageParam) ? pageParam[0] : pageParam;
+  if (typeof pageString === 'string') {
+      const parsedPage = parseInt(pageString, 10);
       if (!isNaN(parsedPage) && parsedPage > 0) {
           currentPage = parsedPage;
       }
@@ -61,7 +59,7 @@ export default async function MatchesPage({
           .order('match_date', { ascending: false })
           .range(from, to),
       supabase.from('players')
-          .select('id, name') // Select only needed fields for PlayerInfo
+          .select('id, name')
           .eq('user_id', userId)
           .order('name', { ascending: true })
   ]);
@@ -90,9 +88,7 @@ export default async function MatchesPage({
   // Render Client Component
   return (
     <MatchesClientComponent
-      // Use type assertion with the imported shared type
       initialMatches={(matches as MatchWithPlayers[]) ?? []}
-      // Use type assertion with the imported shared type
       availablePlayers={(players as PlayerInfo[]) ?? []}
       currentPage={currentPage}
       totalPages={totalPages}
