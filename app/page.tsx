@@ -1,4 +1,4 @@
-// app/page.tsx (Refactored Server Component using Shared Types - Lint Fix)
+// app/page.tsx (Refactored Server Component using Shared Types - Lint Fix v2)
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 // --- Import Client Component ---
@@ -31,11 +31,15 @@ interface LastMatchQueryResult {
     match_players: MatchPlayerWithNestedPlayer[] | null;
 }
 
-// Helper to check if an error object looks like a PostgrestError
+// --- Helper to check if an error object looks like a PostgrestError ---
 interface PostgrestError { message: string; details?: string | null; hint?: string | null; code?: string | null; }
-function isPostgrestError(error: any): error is PostgrestError {
+// ***** PLEASE DOUBLE-CHECK THIS LINE in your code *****
+// Ensure the 'error' parameter is typed as 'unknown', not 'any'
+function isPostgrestError(error: unknown): error is PostgrestError {
+// ********************************************************
     return typeof error === 'object' && error !== null && 'message' in error;
 }
+// --- End Helper ---
 
 
 export default async function DashboardPage() {
@@ -54,7 +58,7 @@ export default async function DashboardPage() {
   let leaderboardData: LeaderboardData[] = [];
   let bestDuoForClient: ClientDuoStat | null = null;
   let lastMatchForClient: LastMatchData | null = null;
-  let overallError: string | null = null; // Keep this variable
+  let overallError: string | null = null;
 
   try {
       // --- Fetch All Data Concurrently ---
@@ -76,7 +80,7 @@ export default async function DashboardPage() {
       ]);
 
       // --- Process Results ---
-      // (Error checks simplified for brevity - keep existing checks or enhance)
+      // (Using type guard for error checking)
       if (playerRes.error) throw playerRes.error;
       availablePlayers = (playerRes.data ?? []) as Player[];
 
@@ -121,7 +125,7 @@ export default async function DashboardPage() {
 
   } catch (err) {
       console.error("Error fetching or processing dashboard data:", err);
-      // Assign error message to overallError
+      // Assign error message to overallError using type guard
       if (isPostgrestError(err)) {
           overallError = `Database Error: ${err.message}${err.hint ? ` (Hint: ${err.hint})` : ''}`;
       } else if (err instanceof Error) {
@@ -143,8 +147,7 @@ export default async function DashboardPage() {
         leaderboardData={leaderboardData}
         bestDuo={bestDuoForClient}
         lastMatch={lastMatchForClient}
-        // --- Fix: Pass overallError as initialError prop ---
-        initialError={overallError}
+        initialError={overallError} // Pass error state
     />
   );
 }

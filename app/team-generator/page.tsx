@@ -1,153 +1,42 @@
-// app/page.tsx (Refactored Server Component using Shared Types - Lint Fix v2)
+// app/team-generator/page.tsx (Server Component)
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-// --- Import Client Component ---
-import DashboardClientComponent from '@/app/dashboard/DashboardClientComponent';
-// --- Import Shared Types ---
-import type { Player, LeaderboardData, ClientDuoStat, LastMatchData } from '@/lib/types'; // Adjust path if needed
-
-// Type returned by our get_duo_stats RPC function
-interface DuoStatRPCResult {
-    player1Id: number; player1Name: string; player2Id: number; player2Name: string;
-    gamesTogether: number; winsTogether: number; winRate: number | null;
-}
-
-// Type for the nested players data in the last match query
-interface NestedPlayerData {
-    name: string | null;
-}
-// Type for the match_players data in the last match query
-interface MatchPlayerWithNestedPlayer {
-    player_id: number;
-    team: string;
-    players: NestedPlayerData[] | NestedPlayerData | null;
-}
-// Type for the last match query result
-interface LastMatchQueryResult {
-    id: number;
-    match_date: string;
-    score_a: number;
-    score_b: number;
-    match_players: MatchPlayerWithNestedPlayer[] | null;
-}
-
-// --- Helper to check if an error object looks like a PostgrestError ---
-interface PostgrestError { message: string; details?: string | null; hint?: string | null; code?: string | null; }
-// ***** PLEASE DOUBLE-CHECK THIS LINE in your code *****
-// Ensure the 'error' parameter is typed as 'unknown', not 'any'
-function isPostgrestError(error: unknown): error is PostgrestError {
-// ********************************************************
-    return typeof error === 'object' && error !== null && 'message' in error;
-}
-// --- End Helper ---
+import TeamGeneratorClientComponent from './TeamGeneratorClientComponent'; // Import the client component
 
 
-export default async function DashboardPage() {
-  const supabase = createClient();
+// This is an async Server Component that fetches data before rendering
+export default async function TeamGeneratorPage() {
+  const supabase = createClient(); // Initialize Supabase server client
 
-  // --- Get Session ---
+  // Get the current user session
   const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+  // Redirect to login if the user is not authenticated
+  // (Middleware should also handle this, but it's a safeguard)
   if (userError || !user) {
-    console.error("Dashboard redirecting, user not found:", userError);
-    redirect('/login');
-  }
-  const userId = user.id;
-
-  // --- Initialize Data Holders ---
-  let availablePlayers: Player[] = [];
-  let leaderboardData: LeaderboardData[] = [];
-  let bestDuoForClient: ClientDuoStat | null = null;
-  let lastMatchForClient: LastMatchData | null = null;
-  let overallError: string | null = null;
-
-  try {
-      // --- Fetch All Data Concurrently ---
-      const [
-          playerRes,
-          leaderboardRes,
-          duoStatsRes,
-          lastMatchRes
-      ] = await Promise.all([
-          supabase.from('players').select('id, name, manual_rating').eq('user_id', userId).order('name', { ascending: true }),
-          supabase.rpc('get_leaderboard_stats', { requesting_user_id: userId }),
-          supabase.rpc('get_duo_stats', { requesting_user_id: userId, min_games_together: 5 }),
-          supabase.from('matches')
-              .select('id, match_date, score_a, score_b, match_players(player_id, team, players(name))')
-              .eq('user_id', userId)
-              .order('match_date', { ascending: false })
-              .limit(1)
-              .maybeSingle<LastMatchQueryResult>()
-      ]);
-
-      // --- Process Results ---
-      // (Using type guard for error checking)
-      if (playerRes.error) throw playerRes.error;
-      availablePlayers = (playerRes.data ?? []) as Player[];
-
-      if (leaderboardRes.error) throw leaderboardRes.error;
-      leaderboardData = (leaderboardRes.data ?? []) as LeaderboardData[];
-
-      if (duoStatsRes.error) throw duoStatsRes.error;
-      const topDuoFromRPC = (duoStatsRes.data as DuoStatRPCResult[] | null)?.[0];
-      if (topDuoFromRPC) {
-          bestDuoForClient = {
-              player1Name: topDuoFromRPC.player1Name,
-              player2Name: topDuoFromRPC.player2Name,
-              gamesTogether: topDuoFromRPC.gamesTogether,
-              winsTogether: topDuoFromRPC.winsTogether,
-              winRateDisplay: topDuoFromRPC.winRate !== null ? `${topDuoFromRPC.winRate.toFixed(1)}%` : 'N/A',
-          };
-      }
-
-      if (lastMatchRes.error) throw lastMatchRes.error;
-      const lastMatchData = lastMatchRes.data;
-      if (lastMatchData && lastMatchData.match_players) {
-          const getPlayerName = (playerData: NestedPlayerData[] | NestedPlayerData | null): string | null => {
-              if (!playerData) return null;
-              if (Array.isArray(playerData)) { return playerData[0]?.name ?? null; }
-              return playerData.name ?? null;
-          };
-          const teamAPlayers = lastMatchData.match_players
-              .filter(mp => mp.team === 'A')
-              .map(mp => getPlayerName(mp.players) || `ID:${mp.player_id}`);
-          const teamBPlayers = lastMatchData.match_players
-              .filter(mp => mp.team === 'B')
-              .map(mp => getPlayerName(mp.players) || `ID:${mp.player_id}`);
-          lastMatchForClient = {
-              id: lastMatchData.id,
-              match_date: lastMatchData.match_date,
-              score_a: lastMatchData.score_a,
-              score_b: lastMatchData.score_b,
-              teamANames: teamAPlayers,
-              teamBNames: teamBPlayers,
-          };
-      }
-
-  } catch (err) {
-      console.error("Error fetching or processing dashboard data:", err);
-      // Assign error message to overallError using type guard
-      if (isPostgrestError(err)) {
-          overallError = `Database Error: ${err.message}${err.hint ? ` (Hint: ${err.hint})` : ''}`;
-      } else if (err instanceof Error) {
-          overallError = err.message;
-      } else {
-          overallError = "An unknown error occurred";
-      }
-      // Ensure data arrays are empty on error
-      availablePlayers = [];
-      leaderboardData = [];
-      bestDuoForClient = null;
-      lastMatchForClient = null;
+     console.error("Error getting user or no user found in Team Generator, redirecting.", userError);
+     redirect('/login');
   }
 
-  // --- Render Client Component ---
+  // Fetch the list of available players associated with the logged-in user
+  // Select the columns needed for the generator (id, name, manual_rating)
+  const { data: players, error } = await supabase
+    .from('players') // Target the 'players' table
+    .select('id, name, manual_rating') // Specify columns to fetch
+    .eq('user_id', user.id) // Filter by the current user's ID
+    .order('name', { ascending: true }); // Order players alphabetically by name
+
+  // Handle potential errors during data fetching
+  if (error) {
+    console.error('Error fetching players for team generator:', error);
+    // In a real app, you might want to show a user-friendly error message here
+    // For now, we'll pass an empty array if fetching fails
+  }
+
+  // Render the Client Component, passing the fetched players list as a prop
+  // Use '?? []' to ensure an empty array is passed if 'players' is null or undefined
   return (
-    <DashboardClientComponent
-        availablePlayers={availablePlayers}
-        leaderboardData={leaderboardData}
-        bestDuo={bestDuoForClient}
-        lastMatch={lastMatchForClient}
-        initialError={overallError} // Pass error state
-    />
+    <TeamGeneratorClientComponent availablePlayers={players ?? []} />
   );
 }
+
