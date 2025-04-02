@@ -4,11 +4,12 @@
 export interface PlayerInfo {
   id: number;
   name: string;
-  manual_rating: number | null;
+  manual_rating: number | null; // Added manual_rating (nullable number)
 }
 
 // Define the structure for the match_players join table data
 export interface MatchPlayerInfo {
+  player_id: number; // Added this field based on query and usage
   team: string; // 'A' or 'B'
   players: PlayerInfo | null; // Represents the single joined 'players' record (or null)
 }
@@ -32,21 +33,19 @@ export interface MatchesPageSearchParams {
   myOtherParam?: string | string[];
 }
 
-// --- UPDATED TYPE DEFINITIONS ---
+// --- UPDATED TYPE DEFINITIONS --- // (Assuming these are still needed elsewhere)
 
 // Updated Leaderboard Data Structure
 export interface LeaderboardEntry {
-  playerId: number; // Correctly defined, ensure usage matches this casing
+  playerId: number;
   playerName: string;
   rank?: number;
   score: number;
-  // Added fields based on errors:
   gamesPlayed: number;
   wins: number;
   draws: number;
   losses: number;
-  winRate: number; // Assuming this is a number (e.g., 0.0 to 1.0)
-  // Add any other relevant leaderboard fields
+  winRate: number; // Assuming this is a number (e.g., 0.0 to 1.0 or 0-100)
 }
 export type LeaderboardData = LeaderboardEntry[];
 
@@ -56,13 +55,11 @@ export interface ClientDuoStat {
   player2Id: number;
   player1Name?: string;
   player2Name?: string;
-  gamesPlayed: number; // Original field
-  winRate: number;     // Original field (e.g., 0.0 to 1.0)
-  // Added fields based on errors:
+  gamesPlayed: number;
+  winRate: number; // e.g., 0.0 to 1.0 or 0-100
   gamesTogether: number;
   winsTogether: number;
-  winRateDisplay?: string; // Example: Assuming this is a formatted string like "55%"
-  // Add other relevant duo statistics
+  winRateDisplay?: string; // Example: Formatted string like "55%"
 }
 
 // Updated Last Match Data Structure
@@ -72,13 +69,10 @@ export interface LastMatchData {
   score_a: number;
   score_b: number;
   replay_url?: string | null;
-  teamAPlayers: string[]; // Original field
-  teamBPlayers: string[]; // Original field
-  // Added fields based on errors (assuming they are arrays of names):
-  teamANames: string[];
-  teamBNames: string[];
-  // Add other relevant fields for displaying the last match summary
+  teamAPlayers: string[]; // Array of player names or IDs
+  teamBPlayers: string[]; // Array of player names or IDs
+  teamANames: string[];   // Array of player names
+  teamBNames: string[];   // Array of player names
 }
-
 
 // Add any other shared types your application uses

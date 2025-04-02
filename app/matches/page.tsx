@@ -50,9 +50,11 @@ export default async function MatchesPage({
   // Fetch matches associated with the user
   const { data: matches, error: matchesError } = await supabase
     .from('matches')
+    // --- Fix: Removed comment from inside the select string ---
     .select(`
       *,
       match_players (
+        player_id,
         team,
         players ( id, name )
       )
@@ -63,16 +65,17 @@ export default async function MatchesPage({
     .order('match_date', { ascending: false });
 
   // --- Fetch Available Players Data ---
-  // Fetch players associated with the user
+  // Fetch players associated with the user (including manual_rating for potential use)
   const { data: players, error: playersError } = await supabase
     .from('players')
-    .select('id, name')
+    .select('id, name, manual_rating') // Select needed fields
     .eq('user_id', session.user.id)
     .order('name', { ascending: true });
 
   // --- Handle Potential Errors ---
   // Log any errors during data fetching
   if (matchesError) {
+    // Log the specific error causing the query failure
     console.error('Error fetching matches:', matchesError.message);
   }
   if (playersError) {
@@ -81,9 +84,11 @@ export default async function MatchesPage({
 
   // --- Render Client Component ---
   // Pass the *resolved* searchParams object down to the client component
+  // Pass potentially null matches/players data safely using ?? []
   return (
     <MatchesClientComponent
       initialMatches={(matches as MatchWithPlayers[]) ?? []}
+      // Ensure players data matches PlayerInfo[] type (including manual_rating)
       availablePlayers={(players as PlayerInfo[]) ?? []}
       searchParams={searchParams} // Pass the resolved object, not the promise
     />
