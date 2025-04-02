@@ -1,68 +1,35 @@
-// lib/types.ts
+// lib/types.ts (or your shared types file location)
 
-// Player definition used across components
-export interface Player {
-  id: number;
-  name: string;
-  manual_rating: number | null;
-}
-
-// Corrected LeaderboardData definition matching RPC output
-export interface LeaderboardData {
-  playerId: number;
-  playerName: string;
-  gamesPlayed: number;
-  wins: number;
-  losses: number;
-  draws: number;
-  winRate: number | null;
-}
-
-// Type for the Best Duo data passed to the client component
-export interface ClientDuoStat {
-  player1Name: string;
-  player2Name: string;
-  gamesTogether: number;
-  winsTogether: number;
-  winRateDisplay: string;
-}
-
-// Type for the Last Match data passed to the client component
-export interface LastMatchData {
-  id: number;
-  match_date: string;
-  score_a: number;
-  score_b: number;
-  teamANames: string[];
-  teamBNames: string[];
-}
-
-// --- NEW: Types for Matches Page ---
-
-// Basic player info used within Match types
+// Define the basic Player structure
 export interface PlayerInfo {
   id: number;
   name: string;
 }
 
-// Represents a player linked to a match
+// Define the structure for the match_players join table data
+// Crucially, 'players' refers to the single related player record.
 export interface MatchPlayerInfo {
-  team: string;
-  // Represents the nested 'players' relation, returned as array by Supabase select
-  players: PlayerInfo[] | null;
+  team: string; // 'A' or 'B'
+  players: PlayerInfo | null; // Represents the single joined 'players' record (or null)
 }
 
-// Represents a match including its players
+// Define the structure for a Match, including the nested match_players
 export interface MatchWithPlayers {
   id: number;
   match_date: string;
   score_a: number;
   score_b: number;
   replay_url?: string | null;
-  user_id: string; // Assuming user_id is needed/present
-  created_at: string; // Assuming created_at is needed/present
-  match_players: MatchPlayerInfo[];
+  user_id: string;
+  created_at: string;
+  match_players: MatchPlayerInfo[]; // Array of player entries for the match
 }
 
-// --- END NEW Types ---
+// You can also add the search params type here if used elsewhere
+export interface MatchesPageSearchParams {
+  [key: string]: string | string[] | undefined;
+  myParam?: string;
+  myOtherParam?: string | string[];
+}
 
+// Add any other shared types your application uses
