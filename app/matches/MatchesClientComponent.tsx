@@ -21,12 +21,11 @@ interface MatchesClientComponentProps {
 // --- Client Component ---
 export default function MatchesClientComponent({
   initialMatches,
-  availablePlayers, // Add availablePlayers to the destructuring
   searchParams
 }: MatchesClientComponentProps) {
 
   // State for matches (initialize with data from server)
-  const [matches, setMatches] = useState(initialMatches);
+  const [matches] = useState(initialMatches);
   // You might have other state here, e.g., for modals:
   // const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -42,11 +41,6 @@ export default function MatchesClientComponent({
 
   // --- Component Logic & JSX ---
   // Example function that might use availablePlayers
-  const handleOpenAddMatchModal = () => {
-    console.log('Opening modal, available players:', availablePlayers);
-    // setIsModalOpen(true);
-    // Populate modal dropdowns using availablePlayers
-  };
 
   return (
     <div>

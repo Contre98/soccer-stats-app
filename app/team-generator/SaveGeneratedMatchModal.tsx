@@ -4,7 +4,7 @@
 import React, { useState, FormEvent, useEffect } from 'react';
 import { X, Calendar as CalendarIcon, Youtube, ShieldCheck, Star } from 'lucide-react';
 // Assuming shared types are used now
-import type { Player } from '@/lib/types'; // Import Player type
+import type { PlayerInfo } from '@/lib/types'; // Import Player type
 
 // Data needed to save the match
 export interface SaveGeneratedMatchData {
@@ -18,8 +18,8 @@ export interface SaveGeneratedMatchData {
 interface SaveGeneratedMatchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  teamA: Player[];
-  teamB: Player[];
+  teamA: PlayerInfo[];
+  teamB: PlayerInfo[];
   onSave: (saveData: SaveGeneratedMatchData) => Promise<void>;
 }
 
