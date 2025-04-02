@@ -1,4 +1,4 @@
-// app/page.tsx (Refactored Server Component using Shared Types)
+// app/page.tsx (Refactored Server Component using Shared Types - Lint Fix)
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 // --- Import Client Component ---
@@ -20,7 +20,7 @@ interface NestedPlayerData {
 interface MatchPlayerWithNestedPlayer {
     player_id: number;
     team: string;
-    players: NestedPlayerData[] | NestedPlayerData | null; // Allow for object or array from Supabase
+    players: NestedPlayerData[] | NestedPlayerData | null;
 }
 // Type for the last match query result
 interface LastMatchQueryResult {
@@ -29,6 +29,12 @@ interface LastMatchQueryResult {
     score_a: number;
     score_b: number;
     match_players: MatchPlayerWithNestedPlayer[] | null;
+}
+
+// Helper to check if an error object looks like a PostgrestError
+interface PostgrestError { message: string; details?: string | null; hint?: string | null; code?: string | null; }
+function isPostgrestError(error: any): error is PostgrestError {
+    return typeof error === 'object' && error !== null && 'message' in error;
 }
 
 
@@ -44,11 +50,11 @@ export default async function DashboardPage() {
   const userId = user.id;
 
   // --- Initialize Data Holders ---
-  let availablePlayers: Player[] = []; // Use shared Player type
-  let leaderboardData: LeaderboardData[] = []; // Use shared LeaderboardData type
-  let bestDuoForClient: ClientDuoStat | null = null; // Use shared ClientDuoStat type
-  let lastMatchForClient: LastMatchData | null = null; // Use shared LastMatchData type
-  let overallError: string | null = null;
+  let availablePlayers: Player[] = [];
+  let leaderboardData: LeaderboardData[] = [];
+  let bestDuoForClient: ClientDuoStat | null = null;
+  let lastMatchForClient: LastMatchData | null = null;
+  let overallError: string | null = null; // Keep this variable
 
   try {
       // --- Fetch All Data Concurrently ---
@@ -70,17 +76,14 @@ export default async function DashboardPage() {
       ]);
 
       // --- Process Results ---
+      // (Error checks simplified for brevity - keep existing checks or enhance)
+      if (playerRes.error) throw playerRes.error;
+      availablePlayers = (playerRes.data ?? []) as Player[];
 
-      // Players
-      if (playerRes.error) throw new Error(`Player fetch failed: ${playerRes.error.message}`);
-      availablePlayers = (playerRes.data ?? []) as Player[]; // Cast or ensure fetch returns matching type
+      if (leaderboardRes.error) throw leaderboardRes.error;
+      leaderboardData = (leaderboardRes.data ?? []) as LeaderboardData[];
 
-      // Leaderboard
-      if (leaderboardRes.error) throw new Error(`Leaderboard fetch failed: ${leaderboardRes.error.message}`);
-      leaderboardData = (leaderboardRes.data ?? []) as LeaderboardData[]; // Cast or ensure RPC returns matching type
-
-      // Duo Stats
-      if (duoStatsRes.error) throw new Error(`Duo stats fetch failed: ${duoStatsRes.error.message}`);
+      if (duoStatsRes.error) throw duoStatsRes.error;
       const topDuoFromRPC = (duoStatsRes.data as DuoStatRPCResult[] | null)?.[0];
       if (topDuoFromRPC) {
           bestDuoForClient = {
@@ -92,8 +95,7 @@ export default async function DashboardPage() {
           };
       }
 
-      // Last Match
-      if (lastMatchRes.error) throw new Error(`Last match fetch failed: ${lastMatchRes.error.message}`);
+      if (lastMatchRes.error) throw lastMatchRes.error;
       const lastMatchData = lastMatchRes.data;
       if (lastMatchData && lastMatchData.match_players) {
           const getPlayerName = (playerData: NestedPlayerData[] | NestedPlayerData | null): string | null => {
@@ -119,7 +121,15 @@ export default async function DashboardPage() {
 
   } catch (err) {
       console.error("Error fetching or processing dashboard data:", err);
-      overallError = err instanceof Error ? err.message : "An unknown error occurred";
+      // Assign error message to overallError
+      if (isPostgrestError(err)) {
+          overallError = `Database Error: ${err.message}${err.hint ? ` (Hint: ${err.hint})` : ''}`;
+      } else if (err instanceof Error) {
+          overallError = err.message;
+      } else {
+          overallError = "An unknown error occurred";
+      }
+      // Ensure data arrays are empty on error
       availablePlayers = [];
       leaderboardData = [];
       bestDuoForClient = null;
@@ -133,7 +143,8 @@ export default async function DashboardPage() {
         leaderboardData={leaderboardData}
         bestDuo={bestDuoForClient}
         lastMatch={lastMatchForClient}
-        // initialError={overallError} // Uncomment if DashboardClientComponent accepts initialError prop
+        // --- Fix: Pass overallError as initialError prop ---
+        initialError={overallError}
     />
   );
 }

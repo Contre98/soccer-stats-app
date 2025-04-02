@@ -6,6 +6,19 @@ import LeaderboardClientComponent from './LeaderboardClientComponent';
 // Ensure this type matches the columns returned by the SQL function!
 import type { LeaderboardData } from './LeaderboardClientComponent';
 
+// Define a type for potential PostgREST errors (subset of properties)
+interface PostgrestError {
+    message: string;
+    details?: string | null;
+    hint?: string | null;
+    code?: string | null;
+}
+
+// Helper to check if an error object looks like a PostgrestError
+function isPostgrestError(error: any): error is PostgrestError {
+    return typeof error === 'object' && error !== null && 'message' in error;
+}
+
 export default async function LeaderboardPage() {
   const supabase = createClient();
 
@@ -21,7 +34,6 @@ export default async function LeaderboardPage() {
   let leaderboardData: LeaderboardData[] = [];
   let fetchError: Error | null = null;
 
-  // --- UPDATED try...catch block with improved logging ---
   try {
     console.log(`Calling RPC get_leaderboard_stats for user: ${userId}`); // Log before call
 
@@ -41,38 +53,35 @@ export default async function LeaderboardPage() {
     console.log(`RPC get_leaderboard_stats returned ${leaderboardData.length} rows.`); // Log success
 
   } catch (err) {
-    // Log detailed error information
+    // --- Fix: Improved Error Handling Type Safety ---
     console.error("Caught error calling/processing RPC function get_leaderboard_stats:");
-    if (err instanceof Error) {
+    if (isPostgrestError(err)) { // Check if it has PostgrestError shape
         console.error("Error Message:", err.message);
-        // Attempt to log PostgREST error details if available
-        const pgError = err as any; // Use any type for potential PostgREST properties
-        console.error("Error Details:", pgError.details); // Might be null
-        console.error("Error Hint:", pgError.hint);       // Might be null
-        console.error("Error Code:", pgError.code);       // Might be null
-        // Set fetchError for the UI
-        fetchError = new Error(`Database Error: ${pgError.message || 'Unknown RPC error'}${pgError.hint ? ` (Hint: ${pgError.hint})` : ''}`);
+        console.error("Error Details:", err.details);
+        console.error("Error Hint:", err.hint);
+        console.error("Error Code:", err.code);
+        fetchError = new Error(`Database Error: ${err.message}${err.hint ? ` (Hint: ${err.hint})` : ''}`);
+    } else if (err instanceof Error) { // Handle generic Errors
+         console.error("Error Message:", err.message);
+         fetchError = err;
     } else {
       // Handle non-Error throws (less common)
       console.error("Unknown error type:", err);
       fetchError = new Error("An unknown error occurred fetching leaderboard data.");
     }
+    // --- End Fix ---
     leaderboardData = []; // Ensure data is empty on error
   }
-  // --- END of UPDATED try...catch block ---
 
   // --- Render Client Component ---
-  // Pass the data fetched via RPC (or empty array) and any error
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Leaderboard</h1>
-      {/* Display Error if fetch failed */}
       {fetchError && (
         <div className="mb-4 p-4 text-center text-red-600 dark:text-red-400 bg-red-50 dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-700" role="alert">
           Error loading leaderboard data: {fetchError.message}
         </div>
       )}
-      {/* Render client component, passing the RPC data */}
       {/* Ensure LeaderboardClientComponent handles potential null winRate */}
       <LeaderboardClientComponent initialLeaderboardData={leaderboardData} />
     </div>
