@@ -22,7 +22,6 @@ interface MatchesClientComponentProps {
 // --- Client Component ---
 export default function MatchesClientComponent({
   initialMatches,
-  availablePlayers, // <-- Added missing availablePlayers prop
   searchParams
 }: MatchesClientComponentProps) {
 
@@ -51,7 +50,7 @@ export default function MatchesClientComponent({
     <div className="container mx-auto px-4 py-8 text-gray-900 dark:text-gray-100">
       <h1 className="text-2xl font-bold mb-4">Matches</h1>
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-        URL Parameter 'myParam': {typeof myParam === 'string' ? myParam : 'Not Provided'}
+        URL Parameter &apos;myParam&apos;: {typeof myParam === 'string' ? myParam : 'Not Provided'}
       </p>
 
       {/* List of Matches */}
