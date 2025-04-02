@@ -1,31 +1,20 @@
-// app/matches/page.tsx (Server Component - Type Fix)
+// app/matches/page.tsx (Server Component - Using Shared Types)
 import { createClient } from '@/lib/supabase/server';
 import MatchesClientComponent from './MatchesClientComponent';
 import { redirect } from 'next/navigation';
-
-// --- Type Definitions ---
-// Keep internal types needed for data processing
-interface PlayerInfo { id: number; name: string; }
-interface MatchPlayerInfo { team: string; players: PlayerInfo | null; }
-interface MatchWithPlayers {
-  id: number; match_date: string; score_a: number; score_b: number;
-  replay_url?: string | null; user_id: string; created_at: string;
-  match_players: MatchPlayerInfo[];
-}
+// --- Import Shared Types ---
+import type { PlayerInfo, MatchWithPlayers } from '@/lib/types'; // Import needed types
 
 const ITEMS_PER_PAGE = 20;
 
-// --- REMOVED MatchesPageProps interface ---
-
-// --- UPDATED Function Signature ---
-export default async function MatchesPage({
-  searchParams, // Destructure searchParams directly
-}: {
-  // Define expected props inline, making searchParams optional
-  searchParams?: { [key: string]: string | string[] | undefined };
-}) {
-// --- END UPDATED Signature ---
-
+// Function Signature using typed props object
+export default async function MatchesPage(
+  props: {
+    params?: { [key: string]: string | string[] };
+    searchParams?: { [key: string]: string | string[] | undefined };
+  }
+) {
+  const searchParams = props.searchParams;
   const supabase = createClient();
 
   // Get user session
@@ -38,14 +27,12 @@ export default async function MatchesPage({
 
   const userId = session.user.id;
 
-  // Pagination Logic - Safely access searchParams
-  const pageParam = searchParams?.page; // Use optional chaining
+  // Pagination Logic
+  const pageParam = searchParams?.page;
   let currentPage = 1;
   if (typeof pageParam === 'string') {
       const parsedPage = parseInt(pageParam, 10);
-      if (!isNaN(parsedPage) && parsedPage > 0) {
-          currentPage = parsedPage;
-      }
+      if (!isNaN(parsedPage) && parsedPage > 0) { currentPage = parsedPage; }
   }
   const from = (currentPage - 1) * ITEMS_PER_PAGE;
   const to = from + ITEMS_PER_PAGE - 1;
@@ -53,45 +40,44 @@ export default async function MatchesPage({
   // Fetch Data
   let fetchError: string | null = null;
 
-  // 1. Fetch total count
-  const { count: totalCount, error: countError } = await supabase
-    .from('matches')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId);
+  // --- Fetch Concurrently ---
+  const [
+      matchCountRes,
+      matchPageRes,
+      playerListRes
+  ] = await Promise.all([
+      supabase.from('matches').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase.from('matches')
+          .select(`
+              id, match_date, score_a, score_b, replay_url, created_at, user_id,
+              match_players ( team, players ( id, name ) )
+          `)
+          .eq('user_id', userId)
+          .order('match_date', { ascending: false })
+          .range(from, to),
+      supabase.from('players')
+          .select('id, name') // Select only needed fields for PlayerInfo
+          .eq('user_id', userId)
+          .order('name', { ascending: true })
+  ]);
 
-  // 2. Fetch current page of matches
-  const { data: matches, error: matchesError } = await supabase
-    .from('matches')
-    .select(`
-      id, match_date, score_a, score_b, replay_url, created_at, user_id,
-      match_players (
-        team,
-        players ( id, name )
-      )
-    `)
-    .eq('user_id', userId)
-    .order('match_date', { ascending: false })
-    .range(from, to);
-
-  // 3. Fetch available players
-  const { data: players, error: playersError } = await supabase
-    .from('players')
-    .select('id, name') // Assuming only id/name needed for modal
-    .eq('user_id', userId)
-    .order('name', { ascending: true });
+  // --- Process Results ---
+  const totalCount = matchCountRes.count;
+  const matches = matchPageRes.data;
+  const players = playerListRes.data;
 
   // Handle Errors
-  if (countError) {
-    console.error('Error fetching match count:', countError);
-    fetchError = `Error fetching match count: ${countError.message}`;
+  if (matchCountRes.error) {
+    console.error('Error fetching match count:', matchCountRes.error);
+    fetchError = `Error fetching match count: ${matchCountRes.error.message}`;
   }
-  if (matchesError) {
-    console.error('Error fetching matches:', matchesError);
-    fetchError = fetchError ? `${fetchError}; Error fetching matches: ${matchesError.message}` : `Error fetching matches: ${matchesError.message}`;
+  if (matchPageRes.error) {
+    console.error('Error fetching matches:', matchPageRes.error);
+    fetchError = fetchError ? `${fetchError}; Error fetching matches: ${matchPageRes.error.message}` : `Error fetching matches: ${matchPageRes.error.message}`;
   }
-  if (playersError) {
-    console.error('Error fetching players:', playersError);
-    fetchError = fetchError ? `${fetchError}; Error fetching players: ${playersError.message}` : `Error fetching players: ${playersError.message}`;
+  if (playerListRes.error) {
+    console.error('Error fetching players:', playerListRes.error);
+    fetchError = fetchError ? `${fetchError}; Error fetching players: ${playerListRes.error.message}` : `Error fetching players: ${playerListRes.error.message}`;
   }
 
   const totalPages = totalCount ? Math.ceil(totalCount / ITEMS_PER_PAGE) : 0;
@@ -99,8 +85,10 @@ export default async function MatchesPage({
   // Render Client Component
   return (
     <MatchesClientComponent
-      initialMatches={(matches as unknown as MatchWithPlayers[]) ?? []}
-      availablePlayers={(players as PlayerInfo[]) ?? []} // Assuming PlayerInfo type matches
+      // Use type assertion with the imported shared type
+      initialMatches={(matches as MatchWithPlayers[]) ?? []}
+      // Use type assertion with the imported shared type
+      availablePlayers={(players as PlayerInfo[]) ?? []}
       currentPage={currentPage}
       totalPages={totalPages}
       error={fetchError}
