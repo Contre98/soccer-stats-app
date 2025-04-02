@@ -4,7 +4,6 @@
 import React, { useState, useEffect } from 'react';
 
 // --- Import Shared Types ---
-// Import types from your centralized types file
 import {
   type MatchWithPlayers,
   type PlayerInfo,
@@ -12,36 +11,42 @@ import {
 } from '@/lib/types'; // Adjust path as needed
 
 // --- Define Props Interface ---
-// Add the 'searchParams' property to the interface
+// This interface correctly defines the expected props
 interface MatchesClientComponentProps {
   initialMatches: MatchWithPlayers[];
-  availablePlayers: PlayerInfo[];
-  searchParams: MatchesPageSearchParams; // Add this line
+  availablePlayers: PlayerInfo[]; // Used for modals, dropdowns etc.
+  searchParams: MatchesPageSearchParams;
 }
 
 // --- Client Component ---
 export default function MatchesClientComponent({
   initialMatches,
-  searchParams // Destructure the new prop here
+  availablePlayers, // Add availablePlayers to the destructuring
+  searchParams
 }: MatchesClientComponentProps) {
 
+  // State for matches (initialize with data from server)
+  const [matches, setMatches] = useState(initialMatches);
+  // You might have other state here, e.g., for modals:
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+
   // --- Use searchParams ---
-  // Example: Access parameters passed from the URL
   const myParam = searchParams?.myParam;
   const myOtherParam = searchParams?.myOtherParam;
 
   useEffect(() => {
-    // Example: Log params when component mounts or params change
     console.log('Client Component - myParam:', myParam);
     console.log('Client Component - myOtherParam:', myOtherParam);
-
-    // You could potentially filter the 'matches' state based on searchParams here
-    // or trigger other actions based on the parameters.
-
-  }, [searchParams, myParam, myOtherParam]); // Add params to dependency array
+    // Add logic based on searchParams if needed
+  }, [searchParams, myParam, myOtherParam]);
 
   // --- Component Logic & JSX ---
-  // (Your existing logic for displaying matches, handling modals, etc.)
+  // Example function that might use availablePlayers
+  const handleOpenAddMatchModal = () => {
+    console.log('Opening modal, available players:', availablePlayers);
+    // setIsModalOpen(true);
+    // Populate modal dropdowns using availablePlayers
+  };
 
   return (
     <div>
@@ -49,22 +54,35 @@ export default function MatchesClientComponent({
       <p>Data received from server.</p>
       <p>URL Parameter &apos;myParam&apos;: {typeof myParam === 'string' ? myParam : 'Not Provided'}</p>
 
-      {/* Add your UI for displaying matches, players, etc. */}
-      {/* Example: */}
-      {/* <ul>
+      {/* Add button to trigger modal (example) */}
+      {/* <button onClick={handleOpenAddMatchModal}>Add New Match</button> */}
+
+      {/* Add your UI for displaying matches */}
+      <ul>
         {matches.map(match => (
           <li key={match.id}>
             Match Date: {new Date(match.match_date).toLocaleDateString()} - Score: {match.score_a} vs {match.score_b}
-             Display players involved
-             {match.match_players.map(mp => (
-               <span key={mp.players?.id}> Team {mp.team}: {mp.players?.name || 'N/A'} </span>
-             ))}
+            {/* Display players involved */}
+            <div>
+              {match.match_players.map(mp => (
+                <span key={mp.players?.id || `team-${mp.team}`} style={{ marginRight: '10px' }}>
+                   Team {mp.team}: {mp.players?.name || 'N/A'}
+                </span>
+              ))}
+            </div>
           </li>
         ))}
-      </ul> */}
+        {matches.length === 0 && <li>No matches found.</li>}
+      </ul>
 
-      {/* Add your modals, buttons, etc. */}
-
+      {/* Add your modals, etc. */}
+      {/* {isModalOpen && (
+        <YourMatchModal
+          availablePlayers={availablePlayers}
+          onClose={() => setIsModalOpen(false)}
+          // other props...
+        />
+      )} */}
     </div>
   );
 }

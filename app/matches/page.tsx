@@ -1,21 +1,91 @@
-// app/matches/page.tsx (Synchronous Page Component)
-import MatchList from './Matchlist'; // Import the new async component
-import { type MatchesPageSearchParams } from '@/lib/types'; // Import type from shared file
+// app/matches/page.tsx (Async Server Component for Next.js 15+)
+import { createClient } from '@/lib/supabase/server';
+import MatchesClientComponent from './MatchesClientComponent';
+import { redirect } from 'next/navigation';
+
+// Import shared types
+import {
+  type MatchWithPlayers,
+  type PlayerInfo,
+  type MatchesPageSearchParams // This is the type for the *resolved* object
+} from '@/lib/types'; // Adjust the path based on your file structure
 
 // --- Page Component ---
 /**
- * Synchronous Page component for the Matches route.
- * Receives searchParams and delegates data fetching and rendering
- * to the async MatchList component.
+ * Async Server Component for the Matches page (Next.js 15+).
+ * Receives searchParams as a Promise, resolves it, fetches data,
+ * and renders the client component.
  */
-export default function MatchesPage({
-  searchParams,
+export default async function MatchesPage({
+  // Type searchParams as a Promise containing the actual search params object type
+  searchParams: searchParamsPromise,
 }: {
-  searchParams: MatchesPageSearchParams; // Define props inline
+  // Define the props structure for the async page
+  searchParams: Promise<MatchesPageSearchParams>;
 }) {
-  console.log('MatchesPage (Sync) - Received searchParams:', searchParams);
+  // --- Resolve searchParams Promise ---
+  // Use await to get the actual searchParams object before proceeding
+  const searchParams = await searchParamsPromise;
+  console.log('MatchesPage (Async) - Resolved searchParams:', searchParams);
 
-  // Render the async component responsible for fetching data,
-  // passing the searchParams down.
-  return <MatchList searchParams={searchParams} />;
+  // Initialize Supabase client
+  const supabase = createClient();
+
+  // Get user session
+  const { data: { session } } = await supabase.auth.getSession();
+
+  // Redirect if not logged in
+  if (!session) {
+    redirect('/login');
+  }
+
+  // --- Access Search Params ---
+  // Now you can safely access the resolved searchParams object
+  const myParam = searchParams?.myParam;
+  console.log('MatchesPage (Async) - myParam value:', myParam);
+  // Use other params for filtering etc. if needed:
+  // const someFilter = searchParams?.filter;
+
+  // --- Fetch Matches Data ---
+  // Fetch matches associated with the user
+  const { data: matches, error: matchesError } = await supabase
+    .from('matches')
+    .select(`
+      *,
+      match_players (
+        team,
+        players ( id, name )
+      )
+    `)
+    .eq('user_id', session.user.id)
+    // Example: Add server-side filtering based on resolved searchParams
+    // .eq(someFilter ? 'column_name' : 'user_id', someFilter || session.user.id)
+    .order('match_date', { ascending: false });
+
+  // --- Fetch Available Players Data ---
+  // Fetch players associated with the user
+  const { data: players, error: playersError } = await supabase
+    .from('players')
+    .select('id, name')
+    .eq('user_id', session.user.id)
+    .order('name', { ascending: true });
+
+  // --- Handle Potential Errors ---
+  // Log any errors during data fetching
+  if (matchesError) {
+    console.error('Error fetching matches:', matchesError.message);
+  }
+  if (playersError) {
+    console.error('Error fetching players:', playersError.message);
+  }
+
+  // --- Render Client Component ---
+  // Pass the *resolved* searchParams object down to the client component
+  return (
+    <MatchesClientComponent
+      initialMatches={(matches as MatchWithPlayers[]) ?? []}
+      availablePlayers={(players as PlayerInfo[]) ?? []}
+      searchParams={searchParams} // Pass the resolved object, not the promise
+    />
+  );
 }
