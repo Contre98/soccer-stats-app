@@ -31,13 +31,15 @@ interface LastMatchQueryResult {
     match_players: MatchPlayerWithNestedPlayer[] | null;
 }
 
-// --- Fix: Changed 'error: any' to 'error: unknown' ---
-// Helper to check if an error object looks like a PostgrestError
+// --- Helper to check if an error object looks like a PostgrestError ---
 interface PostgrestError { message: string; details?: string | null; hint?: string | null; code?: string | null; }
+// ***** PLEASE DOUBLE-CHECK THIS LINE in your code *****
+// Ensure the 'error' parameter is typed as 'unknown', not 'any'
 function isPostgrestError(error: unknown): error is PostgrestError {
+// ********************************************************
     return typeof error === 'object' && error !== null && 'message' in error;
 }
-// --- End Fix ---
+// --- End Helper ---
 
 
 export default async function DashboardPage() {
