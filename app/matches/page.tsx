@@ -1,11 +1,10 @@
-// app/matches/page.tsx (Server Component)
+// app/matches/page.tsx (Server Component - Type Fix)
 import { createClient } from '@/lib/supabase/server';
 import MatchesClientComponent from './MatchesClientComponent';
 import { redirect } from 'next/navigation';
-// --- Fix: Removed unused ReadonlyURLSearchParams import ---
-// import { ReadonlyURLSearchParams } from 'next/navigation';
 
 // --- Type Definitions ---
+// Keep internal types needed for data processing
 interface PlayerInfo { id: number; name: string; }
 interface MatchPlayerInfo { team: string; players: PlayerInfo | null; }
 interface MatchWithPlayers {
@@ -16,11 +15,17 @@ interface MatchWithPlayers {
 
 const ITEMS_PER_PAGE = 20;
 
-interface MatchesPageProps {
-  searchParams: { [key: string]: string | string[] | undefined };
-}
+// --- REMOVED MatchesPageProps interface ---
 
-export default async function MatchesPage({ searchParams }: MatchesPageProps) {
+// --- UPDATED Function Signature ---
+export default async function MatchesPage({
+  searchParams, // Destructure searchParams directly
+}: {
+  // Define expected props inline, making searchParams optional
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
+// --- END UPDATED Signature ---
+
   const supabase = createClient();
 
   // Get user session
@@ -33,8 +38,8 @@ export default async function MatchesPage({ searchParams }: MatchesPageProps) {
 
   const userId = session.user.id;
 
-  // Pagination Logic
-  const pageParam = searchParams?.page;
+  // Pagination Logic - Safely access searchParams
+  const pageParam = searchParams?.page; // Use optional chaining
   let currentPage = 1;
   if (typeof pageParam === 'string') {
       const parsedPage = parseInt(pageParam, 10);
