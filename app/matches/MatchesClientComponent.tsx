@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useTransition } from 'react';
 // --- Import Icons ---
-import { PlusCircle, Loader2, Pencil, Youtube, LinkIcon, Trash2 } from 'lucide-react'; // Removed unused CheckSquare, Square
+import { PlusCircle, Loader2, Pencil, Youtube, Trash2 } from 'lucide-react'; // Removed unused CheckSquare, Square
 
 // --- Import Components & Actions ---
 import AddMatchModal from '@/app/matches/AddMatchModal'; // Adjust path if needed
@@ -222,7 +222,7 @@ export default function MatchesClientComponent({
 
       {/* Search Params Display */}
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-        URL Parameter 'myParam': {typeof myParam === 'string' ? myParam : 'Not Provided'}
+        URL Parameter &apos;myParam&apos;: {typeof myParam === 'string' ? myParam : 'Not Provided'}
       </p>
 
        {/* Display Save/Update/Delete Error if any */}
