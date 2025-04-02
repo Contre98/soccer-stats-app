@@ -14,10 +14,12 @@ interface PostgrestError {
     code?: string | null;
 }
 
+// --- Fix: Changed 'error: any' to 'error: unknown' ---
 // Helper to check if an error object looks like a PostgrestError
-function isPostgrestError(error: any): error is PostgrestError {
+function isPostgrestError(error: unknown): error is PostgrestError {
     return typeof error === 'object' && error !== null && 'message' in error;
 }
+// --- End Fix ---
 
 export default async function LeaderboardPage() {
   const supabase = createClient();
@@ -35,41 +37,38 @@ export default async function LeaderboardPage() {
   let fetchError: Error | null = null;
 
   try {
-    console.log(`Calling RPC get_leaderboard_stats for user: ${userId}`); // Log before call
+    console.log(`Calling RPC get_leaderboard_stats for user: ${userId}`);
 
     // Call the database function
     const { data, error: rpcError } = await supabase
-      .rpc('get_leaderboard_stats', { requesting_user_id: userId }); // Pass user ID
+      .rpc('get_leaderboard_stats', { requesting_user_id: userId });
 
     // Check specifically for RPC error
     if (rpcError) {
-      console.error("RPC Error Object:", JSON.stringify(rpcError, null, 2)); // Log the full error object
-      // Throw the specific RPC error to be caught below
+      console.error("RPC Error Object:", JSON.stringify(rpcError, null, 2));
       throw rpcError;
     }
 
     // RPC succeeded, process data
     leaderboardData = data ?? [];
-    console.log(`RPC get_leaderboard_stats returned ${leaderboardData.length} rows.`); // Log success
+    console.log(`RPC get_leaderboard_stats returned ${leaderboardData.length} rows.`);
 
   } catch (err) {
-    // --- Fix: Improved Error Handling Type Safety ---
+    // Use the updated type guard
     console.error("Caught error calling/processing RPC function get_leaderboard_stats:");
-    if (isPostgrestError(err)) { // Check if it has PostgrestError shape
+    if (isPostgrestError(err)) {
         console.error("Error Message:", err.message);
         console.error("Error Details:", err.details);
         console.error("Error Hint:", err.hint);
         console.error("Error Code:", err.code);
         fetchError = new Error(`Database Error: ${err.message}${err.hint ? ` (Hint: ${err.hint})` : ''}`);
-    } else if (err instanceof Error) { // Handle generic Errors
+    } else if (err instanceof Error) {
          console.error("Error Message:", err.message);
          fetchError = err;
     } else {
-      // Handle non-Error throws (less common)
       console.error("Unknown error type:", err);
       fetchError = new Error("An unknown error occurred fetching leaderboard data.");
     }
-    // --- End Fix ---
     leaderboardData = []; // Ensure data is empty on error
   }
 
@@ -82,7 +81,6 @@ export default async function LeaderboardPage() {
           Error loading leaderboard data: {fetchError.message}
         </div>
       )}
-      {/* Ensure LeaderboardClientComponent handles potential null winRate */}
       <LeaderboardClientComponent initialLeaderboardData={leaderboardData} />
     </div>
   );
