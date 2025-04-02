@@ -4,11 +4,12 @@
 import React, { useState, FormEvent, useEffect } from 'react';
 import { X, Calendar as CalendarIcon, Youtube, ShieldCheck, Star } from 'lucide-react';
 
-// Player type definition (can be shared)
+// --- UPDATED Player type definition ---
+// Changed manual_rating to number | null to match the type used in TeamGeneratorClientComponent
 interface Player {
   id: number;
   name: string;
-  manual_rating: number;
+  manual_rating: number | null; // <-- Updated type
 }
 
 // Data needed to save the match (excluding players, which are passed separately)
@@ -19,13 +20,12 @@ export interface SaveGeneratedMatchData {
     replay_url?: string | null;
 }
 
-// Props for this modal
+// Props for this modal - uses the updated Player type
 interface SaveGeneratedMatchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  teamA: Player[]; // Generated Team A players
-  teamB: Player[]; // Generated Team B players
-  // Save handler takes only the new details
+  teamA: Player[]; // Now expects Player[] where Player has manual_rating: number | null
+  teamB: Player[]; // Now expects Player[] where Player has manual_rating: number | null
   onSave: (saveData: SaveGeneratedMatchData) => Promise<void>;
 }
 
@@ -73,9 +73,9 @@ export default function SaveGeneratedMatchModal({
       });
       onClose(); // Close modal on success
     } catch (error) {
-      console.error("Failed to save generated match:", error);
-      alert(`Failed to save match: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      // Keep modal open on error
+      // Error alerting handled by the calling component (TeamGeneratorClientComponent)
+      // console.error("Failed to save generated match (from modal):", error); // Optional logging
+      // Keep modal open on error - error is thrown back to caller
     } finally {
       setIsSaving(false);
     }
@@ -83,9 +83,9 @@ export default function SaveGeneratedMatchModal({
 
   if (!isOpen) return null;
 
-  // Calculate team sums for display
-  const sumA = teamA.reduce((sum, p) => sum + p.manual_rating, 0);
-  const sumB = teamB.reduce((sum, p) => sum + p.manual_rating, 0);
+  // --- UPDATED: Calculate team sums defensively (treat null rating as 0 for sum) ---
+  const sumA = teamA.reduce((sum, p) => sum + (p.manual_rating || 0), 0);
+  const sumB = teamB.reduce((sum, p) => sum + (p.manual_rating || 0), 0);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 z-40 flex justify-center items-center p-4">
@@ -101,17 +101,47 @@ export default function SaveGeneratedMatchModal({
         <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto pr-2">
           {/* Display Generated Teams (Read-Only) */}
           <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+             {/* Team A Display */}
              <div className="border border-blue-200 dark:border-blue-700 rounded p-3 bg-blue-50 dark:bg-gray-700">
-                <h4 className="text-md font-semibold mb-2 text-blue-700 dark:text-blue-400 flex items-center justify-between"><span><ShieldCheck className="w-4 h-4 mr-1 inline"/> Team A</span><span className="text-xs font-mono">Σ {sumA}</span></h4>
-                <ul className="space-y-1 max-h-32 overflow-y-auto">{teamA.map(player => (<li key={player.id} className="text-sm text-gray-800 dark:text-gray-200 flex justify-between items-center"><span>{player.name}</span><span className="text-xs text-gray-500 dark:text-gray-400 flex items-center"><Star className="w-3 h-3 mr-1 text-yellow-400" /> {player.manual_rating}</span></li>))}</ul>
+                <h4 className="text-md font-semibold mb-2 text-blue-700 dark:text-blue-400 flex items-center justify-between">
+                    <span><ShieldCheck className="w-4 h-4 mr-1 inline"/> Team A</span>
+                    <span className="text-xs font-mono">Σ {sumA}</span>
+                </h4>
+                <ul className="space-y-1 max-h-32 overflow-y-auto">
+                    {teamA.map(player => (
+                        <li key={player.id} className="text-sm text-gray-800 dark:text-gray-200 flex justify-between items-center">
+                            <span>{player.name}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                                <Star className="w-3 h-3 mr-1 text-yellow-400" />
+                                {/* UPDATED: Display rating or 'N/A' if null */}
+                                {player.manual_rating ?? 'N/A'}
+                            </span>
+                        </li>
+                    ))}
+                </ul>
              </div>
+             {/* Team B Display */}
              <div className="border border-red-200 dark:border-red-700 rounded p-3 bg-red-50 dark:bg-gray-700">
-                <h4 className="text-md font-semibold mb-2 text-red-700 dark:text-red-400 flex items-center justify-between"><span><ShieldCheck className="w-4 h-4 mr-1 inline"/> Team B</span><span className="text-xs font-mono">Σ {sumB}</span></h4>
-                <ul className="space-y-1 max-h-32 overflow-y-auto">{teamB.map(player => (<li key={player.id} className="text-sm text-gray-800 dark:text-gray-200 flex justify-between items-center"><span>{player.name}</span><span className="text-xs text-gray-500 dark:text-gray-400 flex items-center"><Star className="w-3 h-3 mr-1 text-yellow-400" /> {player.manual_rating}</span></li>))}</ul>
+                <h4 className="text-md font-semibold mb-2 text-red-700 dark:text-red-400 flex items-center justify-between">
+                    <span><ShieldCheck className="w-4 h-4 mr-1 inline"/> Team B</span>
+                    <span className="text-xs font-mono">Σ {sumB}</span>
+                </h4>
+                <ul className="space-y-1 max-h-32 overflow-y-auto">
+                    {teamB.map(player => (
+                        <li key={player.id} className="text-sm text-gray-800 dark:text-gray-200 flex justify-between items-center">
+                            <span>{player.name}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                                <Star className="w-3 h-3 mr-1 text-yellow-400" />
+                                {/* UPDATED: Display rating or 'N/A' if null */}
+                                {player.manual_rating ?? 'N/A'}
+                            </span>
+                        </li>
+                    ))}
+                </ul>
              </div>
           </div>
 
-          {/* Inputs for Match Details */}
+          {/* Inputs for Match Details (same as before) */}
           <div className="space-y-4">
              <div><label htmlFor="saveMatchDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Match Date</label><div className="relative"><span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"><CalendarIcon className="w-4 h-4" /></span><input type="date" id="saveMatchDate" value={date} onChange={(e) => setDate(e.target.value)} required disabled={isSaving} className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-70" /></div></div>
              <div className="flex items-center space-x-4">
@@ -122,7 +152,7 @@ export default function SaveGeneratedMatchModal({
              <div><label htmlFor="saveReplayUrl" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">YouTube Replay URL (Optional)</label><div className="relative"><span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"><Youtube className="w-4 h-4" /></span><input type="url" id="saveReplayUrl" value={replayUrl} onChange={(e) => setReplayUrl(e.target.value)} disabled={isSaving} className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-70" placeholder="https://youtube.com/watch?v=..." /></div></div>
           </div>
 
-          {/* Form Actions */}
+          {/* Form Actions (same as before) */}
           <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3 flex-shrink-0">
             <button type="button" onClick={onClose} disabled={isSaving} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 disabled:opacity-50">Cancel</button>
             <button type="submit" disabled={isSaving} className="px-4 py-2 bg-green-600 text-white rounded-md shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[110px]">
