@@ -1,20 +1,23 @@
-// app/matches/page.tsx (Server Component - Using Shared Types)
+// app/matches/page.tsx (Server Component - Final Type Fix Attempt)
 import { createClient } from '@/lib/supabase/server';
 import MatchesClientComponent from './MatchesClientComponent';
 import { redirect } from 'next/navigation';
 // --- Import Shared Types ---
-import type { PlayerInfo, MatchWithPlayers } from '@/lib/types'; // Import needed types
+// Make sure PlayerInfo and MatchWithPlayers are correctly defined in lib/types.ts
+import type { PlayerInfo, MatchWithPlayers } from '@/lib/types';
 
 const ITEMS_PER_PAGE = 20;
 
-// Function Signature using typed props object
-export default async function MatchesPage(
-  props: {
-    params?: { [key: string]: string | string[] };
-    searchParams?: { [key: string]: string | string[] | undefined };
-  }
-) {
-  const searchParams = props.searchParams;
+// --- UPDATED Function Signature: Explicitly type params and searchParams ---
+export default async function MatchesPage({
+  params, // Include params in signature even if unused
+  searchParams,
+}: {
+  params: { [key: string]: string | string[] | undefined }; // Standard params type
+  searchParams?: { [key: string]: string | string[] | undefined }; // Standard searchParams type (optional)
+}) {
+// --- END UPDATED Signature ---
+
   const supabase = createClient();
 
   // Get user session
@@ -27,12 +30,14 @@ export default async function MatchesPage(
 
   const userId = session.user.id;
 
-  // Pagination Logic
-  const pageParam = searchParams?.page;
+  // Pagination Logic - Safely access searchParams
+  const pageParam = searchParams?.page; // Use optional chaining
   let currentPage = 1;
   if (typeof pageParam === 'string') {
       const parsedPage = parseInt(pageParam, 10);
-      if (!isNaN(parsedPage) && parsedPage > 0) { currentPage = parsedPage; }
+      if (!isNaN(parsedPage) && parsedPage > 0) {
+          currentPage = parsedPage;
+      }
   }
   const from = (currentPage - 1) * ITEMS_PER_PAGE;
   const to = from + ITEMS_PER_PAGE - 1;
