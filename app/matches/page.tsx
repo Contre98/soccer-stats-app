@@ -1,4 +1,4 @@
-// app/matches/page.tsx (Server Component - Final Type Fix Attempt)
+// app/matches/page.tsx (Server Component - Unused Var Fix)
 import { createClient } from '@/lib/supabase/server';
 import MatchesClientComponent from './MatchesClientComponent';
 import { redirect } from 'next/navigation';
@@ -8,9 +8,9 @@ import type { PlayerInfo, MatchWithPlayers } from '@/lib/types';
 
 const ITEMS_PER_PAGE = 20;
 
-// --- UPDATED Function Signature: Explicitly type params and searchParams ---
+// --- UPDATED Function Signature: Prefix unused 'params' with '_' ---
 export default async function MatchesPage({
-  params, // Include params in signature even if unused
+  params: _params, // Prefixed with underscore to indicate unused
   searchParams,
 }: {
   params: { [key: string]: string | string[] | undefined }; // Standard params type
