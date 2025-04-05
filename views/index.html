@@ -1,0 +1,35 @@
+{{define "index"}}
+{{template "layout" .}}
+
+{{block "title" .}}{{.Title}}{{end}}
+
+{{block "content" .}}
+    <h1 class="text-2xl font-bold mb-4">{{.Title}}</h1>
+
+    <!-- Player List -->
+    <div class="bg-white p-4 rounded shadow mb-6">
+        <h2 class="text-xl font-semibold mb-3">Current Players</h2>
+        {{if .Players}}
+            <ul class="list-disc pl-5 space-y-1">
+                {{range .Players}}
+                    <li>{{.Name}} (ID: {{.ID}})</li>
+                    <!-- Could add more player details or actions here -->
+                {{end}}
+            </ul>
+        {{else}}
+            <p class="text-gray-500">No players found in the database yet.</p>
+        {{end}}
+    </div>
+
+    <!-- Example HTMX Button (Keep or remove as needed) -->
+    <div id="content-area" class="bg-white p-4 rounded shadow">
+        Initial content.
+    </div>
+    <button hx-get="/load-content" hx-target="#content-area" hx-swap="innerHTML"
+            class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
+        Load Content via HTMX
+    </button>
+
+{{end}}
+
+{{end}}
