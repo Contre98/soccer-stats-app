@@ -31,6 +31,7 @@ interface BulkDeleteActionResult {
  * Server Action to add a new match and its players.
  */
 export async function addMatchAction(matchData: MatchSaveData): Promise<AddActionResult> {
+  console.log("TUVIEJA")
   const supabase = createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) { return { success: false, error: 'Authentication required.' }; }

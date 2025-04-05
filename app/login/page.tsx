@@ -94,7 +94,7 @@ export default function LoginPage() {
           supabaseClient={supabase}
           appearance={dynamicAppearance} // Use the dynamic appearance object
           theme={theme} // Pass theme for ThemeSupa base styles
-          providers={['google', 'github']}
+          providers={[]}
           redirectTo={`${typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')}/auth/callback`}
         />
       </div>
